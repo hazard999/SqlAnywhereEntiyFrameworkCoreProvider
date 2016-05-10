@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Migrations
 {
-    public class MyHistoryRepository : HistoryRepository
+    public class SqlAnywhereHistoryRepository : HistoryRepository
     {
-        public MyHistoryRepository(
+        public SqlAnywhereHistoryRepository(
             IDatabaseCreator databaseCreator,
             IRawSqlCommandBuilder rawSqlCommandBuilder,
             IRelationalConnection connection,

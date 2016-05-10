@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Update;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Update
 {
-    public class MyUpdateSqlGenerator : UpdateSqlGenerator
+    public class SqlAnyhwereUpdateSqlGenerator : UpdateSqlGenerator
     {
-        public MyUpdateSqlGenerator(ISqlGenerationHelper sqlGenerationHelper)
+        public SqlAnyhwereUpdateSqlGenerator(ISqlGenerationHelper sqlGenerationHelper)
             : base(sqlGenerationHelper)
         {
         }

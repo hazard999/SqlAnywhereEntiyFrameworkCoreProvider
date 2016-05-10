@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Update;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Update
 {
-    public class MyModificationCommandBatchFactory : IModificationCommandBatchFactory
+    public class SqlAnyhwereModificationCommandBatchFactory : IModificationCommandBatchFactory
     {
         public ModificationCommandBatch Create()
         {

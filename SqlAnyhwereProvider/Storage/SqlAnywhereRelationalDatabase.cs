@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Update;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Storage
 {
-    public class MyRelationalDatabase : RelationalDatabase
+    public class SqlAnywhereRelationalDatabase : RelationalDatabase
     {
-        public MyRelationalDatabase(IQueryCompilationContextFactory queryCompilationContextFactory,
+        public SqlAnywhereRelationalDatabase(IQueryCompilationContextFactory queryCompilationContextFactory,
             ICommandBatchPreparer batchPreparer,
             IBatchExecutor batchExecutor,
             IRelationalConnection connection)

@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Infrastructure
 {
-    public class MyModelSource : ModelSource
+    public class SqlAnywhereModelSource : ModelSource
     {
-        public MyModelSource(IDbSetFinder setFinder,
+        public SqlAnywhereModelSource(IDbSetFinder setFinder,
             ICoreConventionSetBuilder coreConventionSetBuilder,
             IModelCustomizer modelCustomizer,
             IModelCacheKeyFactory modelCacheKeyFactory)

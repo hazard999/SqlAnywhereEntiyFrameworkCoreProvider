@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Query.Sql
 {
-    public class MyQuerySqlGeneratorFactory : QuerySqlGeneratorFactoryBase
+    public class SqlAnyhwereQuerySqlGeneratorFactory : QuerySqlGeneratorFactoryBase
     {
-        public MyQuerySqlGeneratorFactory(
+        public SqlAnyhwereQuerySqlGeneratorFactory(
             IRelationalCommandBuilderFactory commandBuilderFactory,
             ISqlGenerationHelper sqlGenerationHelper,
             IParameterNameGeneratorFactory parameterNameGeneratorFactory,

@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Storage
 {
-    public class MyRelationalDatabaseCreator : RelationalDatabaseCreator
+    public class SqlAnywhereRelationalDatabaseCreator : RelationalDatabaseCreator
     {
-        public MyRelationalDatabaseCreator(IModel model, IRelationalConnection connection, IMigrationsModelDiffer modelDiffer, IMigrationsSqlGenerator migrationsSqlGenerator, IMigrationCommandExecutor migrationCommandExecutor)
+        public SqlAnywhereRelationalDatabaseCreator(IModel model, IRelationalConnection connection, IMigrationsModelDiffer modelDiffer, IMigrationsSqlGenerator migrationsSqlGenerator, IMigrationCommandExecutor migrationCommandExecutor)
             : base(model, connection, modelDiffer, migrationsSqlGenerator, migrationCommandExecutor)
         {
         }

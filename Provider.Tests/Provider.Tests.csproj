@@ -167,9 +167,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EntityFrameworkCore.RelationalProviderStarter\EntityFrameworkCore.RelationalProviderStarter.csproj">
+    <ProjectReference Include="..\SqlAnyhwereProvider\SqlAnywhereProvider.csproj">
       <Project>{b0985182-afe8-47a9-990d-43b7021d1e38}</Project>
-      <Name>EntityFrameworkCore.RelationalProviderStarter</Name>
+      <Name>SqlAnywhereProvider</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

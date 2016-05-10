@@ -7,8 +7,8 @@
     <ProjectGuid>{B0985182-AFE8-47A9-990D-43B7021D1E38}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EntityFrameworkCore.RelationalProviderStarter</RootNamespace>
-    <AssemblyName>EntityFrameworkCore.RelationalProviderStarter</AssemblyName>
+    <RootNamespace>SqlAnywhereProvider</RootNamespace>
+    <AssemblyName>SqlAnywhereProvider</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -101,24 +101,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\EntityFrameworkServicesBuilderExtensions.cs" />
-    <Compile Include="Extensions\MyRelationalProviderDbContextOptionsExtensions.cs" />
-    <Compile Include="Infrastructure\MyModelSource.cs" />
-    <Compile Include="Infrastructure\MyRelationalProviderOptionsExtension.cs" />
-    <Compile Include="Metadata\MyRelationalAnnotationProvider.cs" />
-    <Compile Include="Migrations\MyHistoryRepository.cs" />
+    <Compile Include="Extensions\SqlAnywhereProviderDbContextOptionsExtensions.cs" />
+    <Compile Include="Infrastructure\SqlAnywhereModelSource.cs" />
+    <Compile Include="Infrastructure\SqlAnywhereProviderOptionsExtension.cs" />
+    <Compile Include="Metadata\SqlAnywhereRelationalAnnotationProvider.cs" />
+    <Compile Include="Migrations\SqlAnywhereHistoryRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Query\ExpressionTranslators\Internal\MyRelationalCompositeMemberTranslator.cs" />
-    <Compile Include="Query\ExpressionTranslators\Internal\MyRelationalCompositeMethodCallTranslator.cs" />
-    <Compile Include="Query\Sql\MyQuerySqlGeneratorFactory.cs" />
-    <Compile Include="Storage\MyRelationalSqlGenerationHelper.cs" />
-    <Compile Include="Storage\MyRelationalDatabase.cs" />
-    <Compile Include="Storage\MyRelationalDatabaseCreator.cs" />
+    <Compile Include="Query\ExpressionTranslators\Internal\SqlAnyhwereRelationalCompositeMemberTranslator.cs" />
+    <Compile Include="Query\ExpressionTranslators\Internal\SqlAnyhwereRelationalCompositeMethodCallTranslator.cs" />
+    <Compile Include="Query\Sql\SqlAnyhwereQuerySqlGeneratorFactory.cs" />
+    <Compile Include="Storage\SqlAnywhereRelationalSqlGenerationHelper.cs" />
+    <Compile Include="Storage\SqlAnywhereRelationalDatabase.cs" />
+    <Compile Include="Storage\SqlAnywhereRelationalDatabaseCreator.cs" />
     <Compile Include="Storage\SqlAnyhwereDatabaseProviderServices.cs" />
-    <Compile Include="Storage\MyRelationalConnection.cs" />
+    <Compile Include="Storage\SqlAnywhereRelationalConnection.cs" />
     <Compile Include="ValueGeneration\SqlAnyhwereValueGeneratorSelector.cs" />
-    <Compile Include="Update\MyModificationCommandBatchFactory.cs" />
-    <Compile Include="Update\MyUpdateSqlGenerator.cs" />
-    <Compile Include="ValueGeneration\MyValueGeneratorCache.cs" />
+    <Compile Include="Update\SqlAnyhwereModificationCommandBatchFactory.cs" />
+    <Compile Include="Update\SqlAnyhwereUpdateSqlGenerator.cs" />
+    <Compile Include="ValueGeneration\SqlAnyhwereValueGeneratorCache.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

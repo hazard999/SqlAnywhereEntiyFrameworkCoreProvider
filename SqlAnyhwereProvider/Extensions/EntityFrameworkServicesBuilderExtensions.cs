@@ -21,27 +21,27 @@ namespace Microsoft.Extensions.DependencyInjection
             serviceCollection.TryAddEnumerable(ServiceDescriptor
                 .Singleton
                 <IDatabaseProvider,
-                    DatabaseProvider<SqlAnyhwereDatabaseProviderServices, MyRelationalProviderOptionsExtension>>());
+                    DatabaseProvider<SqlAnyhwereDatabaseProviderServices, SqlAnywhereProviderOptionsExtension>>());
 
             serviceCollection.TryAdd(new ServiceCollection()
                 // all singleton services
                 
-                .AddSingleton<MyRelationalAnnotationProvider>()
-                .AddSingleton<MyRelationalCompositeMemberTranslator>()
-                .AddSingleton<MyRelationalCompositeMethodCallTranslator>()
-                .AddSingleton<MyRelationalSqlGenerationHelper>()
-                .AddSingleton<MyModelSource>()
-                .AddSingleton<MyValueGeneratorCache>()
+                .AddSingleton<SqlAnywhereRelationalAnnotationProvider>()
+                .AddSingleton<SqlAnyhwereRelationalCompositeMemberTranslator>()
+                .AddSingleton<SqlAnyhwereRelationalCompositeMethodCallTranslator>()
+                .AddSingleton<SqlAnywhereRelationalSqlGenerationHelper>()
+                .AddSingleton<SqlAnywhereModelSource>()
+                .AddSingleton<SqlAnyhwereValueGeneratorCache>()
                 .AddSingleton<SqlAnyhwereValueGeneratorSelector>()
                 // all scoped services
-                .AddScoped<MyRelationalDatabaseCreator>()
+                .AddScoped<SqlAnywhereRelationalDatabaseCreator>()
                 .AddScoped<SqlAnyhwereDatabaseProviderServices>()
-                .AddScoped<MyHistoryRepository>()
-                .AddScoped<MyModificationCommandBatchFactory>()
-                .AddScoped<MyQuerySqlGeneratorFactory>()
-                .AddScoped<MyRelationalConnection>()
-                .AddScoped<MyRelationalDatabaseCreator>()
-                .AddScoped<MyUpdateSqlGenerator>());
+                .AddScoped<SqlAnywhereHistoryRepository>()
+                .AddScoped<SqlAnyhwereModificationCommandBatchFactory>()
+                .AddScoped<SqlAnyhwereQuerySqlGeneratorFactory>()
+                .AddScoped<SqlAnywhereRelationalConnection>()
+                .AddScoped<SqlAnywhereRelationalDatabaseCreator>()
+                .AddScoped<SqlAnyhwereUpdateSqlGenerator>());
 
             return builder;
         }

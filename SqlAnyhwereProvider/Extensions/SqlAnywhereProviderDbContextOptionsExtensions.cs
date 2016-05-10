@@ -3,13 +3,13 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Microsoft.EntityFrameworkCore
 {
-    public static class MyRelationalProviderDbContextOptionsExtensions
+    public static class SqlAnywhereProviderDbContextOptionsExtensions
     {
         public static DbContextOptionsBuilder UseSqlAnywhere(this DbContextOptionsBuilder optionsBuilder,
             string connectionString)
         {
             ((IDbContextOptionsBuilderInfrastructure)optionsBuilder).AddOrUpdateExtension(
-                new MyRelationalProviderOptionsExtension
+                new SqlAnywhereProviderOptionsExtension
                 {
                     ConnectionString = connectionString
                 });

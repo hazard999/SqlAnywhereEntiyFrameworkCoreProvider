@@ -28,43 +28,43 @@ namespace EntityFrameworkCore.RelationalProviderStarter.Storage
             => "SqlAnywhereProvider";
 
         public override IRelationalAnnotationProvider AnnotationProvider
-            => GetService<MyRelationalAnnotationProvider>();
+            => GetService<SqlAnywhereRelationalAnnotationProvider>();
 
         public override IMemberTranslator CompositeMemberTranslator
-            => GetService<MyRelationalCompositeMemberTranslator>();
+            => GetService<SqlAnyhwereRelationalCompositeMemberTranslator>();
 
         public override IMethodCallTranslator CompositeMethodCallTranslator
-            => GetService<MyRelationalCompositeMethodCallTranslator>();
+            => GetService<SqlAnyhwereRelationalCompositeMethodCallTranslator>();
 
         public override IDatabaseCreator Creator
-            => GetService<MyRelationalDatabaseCreator>();
+            => GetService<SqlAnywhereRelationalDatabaseCreator>();
 
         public override IHistoryRepository HistoryRepository
-            => GetService<MyHistoryRepository>();
+            => GetService<SqlAnywhereHistoryRepository>();
 
         public override IModelSource ModelSource
-            => GetService<MyModelSource>();
+            => GetService<SqlAnywhereModelSource>();
 
         public override IModificationCommandBatchFactory ModificationCommandBatchFactory
-            => GetService<MyModificationCommandBatchFactory>();
+            => GetService<SqlAnyhwereModificationCommandBatchFactory>();
 
         public override IQuerySqlGeneratorFactory QuerySqlGeneratorFactory
-            => GetService<MyQuerySqlGeneratorFactory>();
+            => GetService<SqlAnyhwereQuerySqlGeneratorFactory>();
 
         public override IRelationalConnection RelationalConnection
-            => GetService<MyRelationalConnection>();
+            => GetService<SqlAnywhereRelationalConnection>();
 
         public override IRelationalDatabaseCreator RelationalDatabaseCreator
-            => GetService<MyRelationalDatabaseCreator>();
+            => GetService<SqlAnywhereRelationalDatabaseCreator>();
 
         public override ISqlGenerationHelper SqlGenerationHelper
-            => GetService<MyRelationalSqlGenerationHelper>();
+            => GetService<SqlAnywhereRelationalSqlGenerationHelper>();
 
         public override IUpdateSqlGenerator UpdateSqlGenerator
-            => GetService<MyUpdateSqlGenerator>();
+            => GetService<SqlAnyhwereUpdateSqlGenerator>();
 
         public override IValueGeneratorCache ValueGeneratorCache
-            => GetService<MyValueGeneratorCache>();
+            => GetService<SqlAnyhwereValueGeneratorCache>();
 
         public override IValueGeneratorSelector ValueGeneratorSelector 
             => GetService<SqlAnyhwereValueGeneratorSelector>();

@@ -2,7 +2,7 @@
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Query.ExpressionTranslators.Internal
 {
-    public class MyRelationalCompositeMemberTranslator : RelationalCompositeMemberTranslator
+    public class SqlAnyhwereRelationalCompositeMemberTranslator : RelationalCompositeMemberTranslator
     {
     }
 }
