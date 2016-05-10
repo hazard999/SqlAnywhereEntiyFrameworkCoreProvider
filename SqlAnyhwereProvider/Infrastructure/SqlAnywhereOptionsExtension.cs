@@ -3,13 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Infrastructure
 {
-    public class SqlAnywhereProviderOptionsExtension : IDbContextOptionsExtension
+    public class SqlAnywhereOptionsExtension : IDbContextOptionsExtension
     {
         public string ConnectionString { get; set; }
 
         public void ApplyServices(IServiceCollection services)
         {
-            services.AddSqlAnywhereProvider();
+            services.AddEntityFrameworkSqlAnywhere();
         }        
     }
 }

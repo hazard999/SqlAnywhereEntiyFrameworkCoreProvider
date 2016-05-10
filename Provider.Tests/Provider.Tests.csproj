@@ -160,7 +160,7 @@
   <ItemGroup>
     <Compile Include="TestContext.cs" />
     <Compile Include="TestModel.cs" />
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="SqlAnywhereDBContextTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

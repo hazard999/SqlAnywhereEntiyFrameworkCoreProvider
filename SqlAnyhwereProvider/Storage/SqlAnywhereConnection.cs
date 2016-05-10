@@ -7,11 +7,11 @@ using iAnywhere.Data.SQLAnywhere;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Storage
 {
-    public class SqlAnywhereRelationalConnection : RelationalConnection
+    public class SqlAnywhereConnection : RelationalConnection
     {
         private IDbContextOptions Options;
 
-        public SqlAnywhereRelationalConnection(IDbContextOptions options, ILogger logger)
+        public SqlAnywhereConnection(IDbContextOptions options, ILogger logger)
             : base(options, logger)
         {
             Options = options;
@@ -19,7 +19,7 @@ namespace EntityFrameworkCore.RelationalProviderStarter.Storage
 
         protected override DbConnection CreateDbConnection()
         {
-            var myOptions = Options.FindExtension<Infrastructure.SqlAnywhereProviderOptionsExtension>();
+            var myOptions = Options.FindExtension<Infrastructure.SqlAnywhereOptionsExtension>();
             return new SAConnection(myOptions.ConnectionString);
         }
     }

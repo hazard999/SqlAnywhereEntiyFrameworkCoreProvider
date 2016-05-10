@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Metadata
 {
-    public class SqlAnywhereRelationalAnnotationProvider : IRelationalAnnotationProvider
+    public class SqlAnywhereAnnotationProvider : IRelationalAnnotationProvider
     {
         public IRelationalIndexAnnotations For(IIndex index)
         {

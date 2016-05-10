@@ -101,24 +101,28 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\EntityFrameworkServicesBuilderExtensions.cs" />
-    <Compile Include="Extensions\SqlAnywhereProviderDbContextOptionsExtensions.cs" />
+    <Compile Include="Extensions\SqlAnywhereOptionsExtension.cs" />
     <Compile Include="Infrastructure\SqlAnywhereModelSource.cs" />
-    <Compile Include="Infrastructure\SqlAnywhereProviderOptionsExtension.cs" />
-    <Compile Include="Metadata\SqlAnywhereRelationalAnnotationProvider.cs" />
+    <Compile Include="Infrastructure\SqlAnywhereOptionsExtension.cs" />
+    <Compile Include="Metadata\SqlAnywhereAnnotationProvider.cs" />
+    <Compile Include="Migrations\SqlAnywhereConventionSetBuilder.cs" />
     <Compile Include="Migrations\SqlAnywhereHistoryRepository.cs" />
+    <Compile Include="Migrations\SqlAnywhereMigrationsAnnotationProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query\ExpressionTranslators\Internal\SqlAnyhwereRelationalCompositeMemberTranslator.cs" />
     <Compile Include="Query\ExpressionTranslators\Internal\SqlAnyhwereRelationalCompositeMethodCallTranslator.cs" />
     <Compile Include="Query\Sql\SqlAnyhwereQuerySqlGeneratorFactory.cs" />
-    <Compile Include="Storage\SqlAnywhereRelationalSqlGenerationHelper.cs" />
-    <Compile Include="Storage\SqlAnywhereRelationalDatabase.cs" />
-    <Compile Include="Storage\SqlAnywhereRelationalDatabaseCreator.cs" />
+    <Compile Include="Storage\SqlAnywhereModelValidator.cs" />
+    <Compile Include="Storage\SqlAnywhereSqlGenerationHelper.cs" />
+    <Compile Include="Storage\SqlAnywhereDatabase.cs" />
+    <Compile Include="Storage\SqlAnywhereDatabaseCreator.cs" />
     <Compile Include="Storage\SqlAnyhwereDatabaseProviderServices.cs" />
-    <Compile Include="Storage\SqlAnywhereRelationalConnection.cs" />
-    <Compile Include="ValueGeneration\SqlAnyhwereValueGeneratorSelector.cs" />
+    <Compile Include="Storage\SqlAnywhereConnection.cs" />
+    <Compile Include="Storage\SqlAnywhereTypeMapper.cs" />
+    <Compile Include="ValueGeneration\SqlAnywhereValueGeneratorSelector.cs" />
     <Compile Include="Update\SqlAnyhwereModificationCommandBatchFactory.cs" />
     <Compile Include="Update\SqlAnyhwereUpdateSqlGenerator.cs" />
-    <Compile Include="ValueGeneration\SqlAnyhwereValueGeneratorCache.cs" />
+    <Compile Include="ValueGeneration\SqlAnywhereValueGeneratorCache.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -2,7 +2,7 @@
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Storage
 {
-    public class SqlAnywhereRelationalSqlGenerationHelper : RelationalSqlGenerationHelper
+    public class SqlAnywhereSqlGenerationHelper : RelationalSqlGenerationHelper
     {
     }
 }

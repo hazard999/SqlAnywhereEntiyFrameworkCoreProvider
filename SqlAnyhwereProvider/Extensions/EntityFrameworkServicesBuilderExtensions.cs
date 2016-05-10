@@ -1,49 +1,64 @@
 ﻿using EntityFrameworkCore.RelationalProviderStarter.Infrastructure;
 using EntityFrameworkCore.RelationalProviderStarter.Metadata;
 using EntityFrameworkCore.RelationalProviderStarter.Migrations;
-using EntityFrameworkCore.RelationalProviderStarter.Query.ExpressionTranslators.Internal;
-using EntityFrameworkCore.RelationalProviderStarter.Query.Sql;
 using EntityFrameworkCore.RelationalProviderStarter.Storage;
 using EntityFrameworkCore.RelationalProviderStarter.Update;
 using EntityFrameworkCore.RelationalProviderStarter.ValueGeneration;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using SqlAnywhereProvider.Storage;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
+using SqlAnywhereProvider.Migrations;
+using Microsoft.EntityFrameworkCore.Update;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class EntityFrameworkServicesBuilderExtensions
     {
-        public static IServiceCollection AddSqlAnywhereProvider(this IServiceCollection builder)
+        public static IServiceCollection AddEntityFrameworkSqlAnywhere(this IServiceCollection services)
         {
-            var serviceCollection = builder;
+            services.AddRelational();
 
-            serviceCollection.TryAddEnumerable(ServiceDescriptor
-                .Singleton
-                <IDatabaseProvider,
-                    DatabaseProvider<SqlAnyhwereDatabaseProviderServices, SqlAnywhereProviderOptionsExtension>>());
+            services.TryAddEnumerable(ServiceDescriptor
+                .Singleton<IDatabaseProvider, DatabaseProvider<SqlAnywhereProviderServices, SqlAnywhereOptionsExtension>>());
 
-            serviceCollection.TryAdd(new ServiceCollection()
-                // all singleton services
-                
-                .AddSingleton<SqlAnywhereRelationalAnnotationProvider>()
-                .AddSingleton<SqlAnyhwereRelationalCompositeMemberTranslator>()
-                .AddSingleton<SqlAnyhwereRelationalCompositeMethodCallTranslator>()
-                .AddSingleton<SqlAnywhereRelationalSqlGenerationHelper>()
+            var serviceCollection = new ServiceCollection();
+            serviceCollection
+                .AddSingleton<IValueGeneratorCache, SqlAnywhereValueGeneratorCache>()
+                .AddSingleton<SqlAnywhereTypeMapper>()
+                .AddSingleton<SqlAnywhereSqlGenerationHelper>()
                 .AddSingleton<SqlAnywhereModelSource>()
-                .AddSingleton<SqlAnyhwereValueGeneratorCache>()
-                .AddSingleton<SqlAnyhwereValueGeneratorSelector>()
-                // all scoped services
-                .AddScoped<SqlAnywhereRelationalDatabaseCreator>()
-                .AddScoped<SqlAnyhwereDatabaseProviderServices>()
-                .AddScoped<SqlAnywhereHistoryRepository>()
-                .AddScoped<SqlAnyhwereModificationCommandBatchFactory>()
-                .AddScoped<SqlAnyhwereQuerySqlGeneratorFactory>()
-                .AddScoped<SqlAnywhereRelationalConnection>()
-                .AddScoped<SqlAnywhereRelationalDatabaseCreator>()
-                .AddScoped<SqlAnyhwereUpdateSqlGenerator>());
+                .AddSingleton<SqlAnywhereAnnotationProvider>()
+                .AddSingleton<SqlAnywhereMigrationsAnnotationProvider>();
 
-            return builder;
+            serviceCollection
+                .AddScoped<SqlAnywhereConventionSetBuilder>()
+                .AddScoped<IUpdateSqlGenerator, SqlAnyhwereUpdateSqlGenerator>();
+
+            serviceCollection
+                //.AddScoped<ISqlAnywhereSequenceValueGeneratorFactory, SqlAnywhereSequenceValueGeneratorFactory>()
+                //.AddScoped<SqlAnywhereModificationCommandBatchFactory>()
+                .AddScoped<SqlAnywhereValueGeneratorSelector>()
+                //.AddScoped<SqlAnywhereDatabaseProviderServices>()
+                .AddScoped<IRelationalConnection, SqlAnywhereConnection>()
+                //.AddScoped<SqlAnywhereMigrationsSqlGenerator>()
+                .AddScoped<SqlAnywhereDatabaseCreator>()
+                .AddScoped<SqlAnywhereHistoryRepository>();
+            //.AddScoped<SqlAnywhereQueryModelVisitorFactory>()
+            //.AddScoped<SqlAnywhereCompiledQueryCacheKeyGenerator>()
+            //.AddQuery();
+
+            services.TryAdd(serviceCollection);
+            return services;
         }
+
+        //private static IServiceCollection AddQuery(this IServiceCollection serviceCollection)
+        //=> serviceCollection
+        //    .AddScoped<SqlAnywhereQueryCompilationContextFactory>()
+        //    .AddScoped<SqlAnywhereCompositeMemberTranslator>()
+        //    .AddScoped<SqlAnywhereCompositeMethodCallTranslator>()
+        //    .AddScoped<SqlAnywhereQuerySqlGeneratorFactory>();
+        //}
     }
 }

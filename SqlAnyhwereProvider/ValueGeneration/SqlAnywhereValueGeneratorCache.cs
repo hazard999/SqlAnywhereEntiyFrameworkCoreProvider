@@ -2,7 +2,7 @@
 
 namespace EntityFrameworkCore.RelationalProviderStarter.ValueGeneration
 {
-    public class SqlAnyhwereValueGeneratorCache : ValueGeneratorCache
+    public class SqlAnywhereValueGeneratorCache : ValueGeneratorCache
     {
     }
 }

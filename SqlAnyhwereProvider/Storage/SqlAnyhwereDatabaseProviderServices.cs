@@ -7,6 +7,7 @@ using EntityFrameworkCore.RelationalProviderStarter.Query.Sql;
 using EntityFrameworkCore.RelationalProviderStarter.Update;
 using EntityFrameworkCore.RelationalProviderStarter.ValueGeneration;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Query.ExpressionTranslators;
@@ -14,12 +15,13 @@ using Microsoft.EntityFrameworkCore.Query.Sql;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
+using SqlAnywhereProvider.Storage;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Storage
 {
-    public class SqlAnyhwereDatabaseProviderServices : RelationalDatabaseProviderServices
+    public class SqlAnywhereProviderServices : RelationalDatabaseProviderServices
     {
-        public SqlAnyhwereDatabaseProviderServices(IServiceProvider services)
+        public SqlAnywhereProviderServices(IServiceProvider services)
             : base(services)
         {
         }
@@ -28,7 +30,7 @@ namespace EntityFrameworkCore.RelationalProviderStarter.Storage
             => "SqlAnywhereProvider";
 
         public override IRelationalAnnotationProvider AnnotationProvider
-            => GetService<SqlAnywhereRelationalAnnotationProvider>();
+            => GetService<SqlAnywhereAnnotationProvider>();
 
         public override IMemberTranslator CompositeMemberTranslator
             => GetService<SqlAnyhwereRelationalCompositeMemberTranslator>();
@@ -37,7 +39,7 @@ namespace EntityFrameworkCore.RelationalProviderStarter.Storage
             => GetService<SqlAnyhwereRelationalCompositeMethodCallTranslator>();
 
         public override IDatabaseCreator Creator
-            => GetService<SqlAnywhereRelationalDatabaseCreator>();
+            => GetService<SqlAnywhereDatabaseCreator>();
 
         public override IHistoryRepository HistoryRepository
             => GetService<SqlAnywhereHistoryRepository>();
@@ -52,21 +54,24 @@ namespace EntityFrameworkCore.RelationalProviderStarter.Storage
             => GetService<SqlAnyhwereQuerySqlGeneratorFactory>();
 
         public override IRelationalConnection RelationalConnection
-            => GetService<SqlAnywhereRelationalConnection>();
+            => GetService<SqlAnywhereConnection>();
 
         public override IRelationalDatabaseCreator RelationalDatabaseCreator
-            => GetService<SqlAnywhereRelationalDatabaseCreator>();
+            => GetService<SqlAnywhereDatabaseCreator>();
 
         public override ISqlGenerationHelper SqlGenerationHelper
-            => GetService<SqlAnywhereRelationalSqlGenerationHelper>();
+            => GetService<SqlAnywhereSqlGenerationHelper>();
 
         public override IUpdateSqlGenerator UpdateSqlGenerator
             => GetService<SqlAnyhwereUpdateSqlGenerator>();
 
         public override IValueGeneratorCache ValueGeneratorCache
-            => GetService<SqlAnyhwereValueGeneratorCache>();
+            => GetService<SqlAnywhereValueGeneratorCache>();
 
         public override IValueGeneratorSelector ValueGeneratorSelector 
-            => GetService<SqlAnyhwereValueGeneratorSelector>();
+            => GetService<SqlAnywhereValueGeneratorSelector>();
+
+        public override IModelValidator ModelValidator
+            => GetService<SqlAnywhereModelValidator>();
     }
 }
