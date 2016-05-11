@@ -11,7 +11,7 @@ namespace Provider.Tests
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             var fac = new SAConnectionStringBuilder();
-            fac.DatabaseName = "test";
+            fac.ServerName = "test";
             fac.UserID = "dba";
             fac.Password = "sql";
             fac.Integrated = "true";
@@ -26,6 +26,7 @@ namespace Provider.Tests
 
             blog
                 .Property(b => b.Url)
+                .HasMaxLength(500)
                 .IsRequired();
 
             blog.Property(b => b.BlogId)

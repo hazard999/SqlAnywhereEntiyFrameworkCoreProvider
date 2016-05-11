@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data.Common;
+﻿using System.Data.Common;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
@@ -11,7 +10,7 @@ namespace EntityFrameworkCore.RelationalProviderStarter.Storage
     {
         private IDbContextOptions Options;
 
-        public SqlAnywhereConnection(IDbContextOptions options, ILogger logger)
+        public SqlAnywhereConnection(IDbContextOptions options, ILogger<SqlAnywhereConnection> logger)
             : base(options, logger)
         {
             Options = options;

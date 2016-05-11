@@ -7,7 +7,6 @@ using EntityFrameworkCore.RelationalProviderStarter.Query.Sql;
 using EntityFrameworkCore.RelationalProviderStarter.Update;
 using EntityFrameworkCore.RelationalProviderStarter.ValueGeneration;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Query.ExpressionTranslators;
@@ -15,6 +14,7 @@ using Microsoft.EntityFrameworkCore.Query.Sql;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
+using System.Reflection;
 using SqlAnywhereProvider.Storage;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Storage
@@ -27,51 +27,41 @@ namespace EntityFrameworkCore.RelationalProviderStarter.Storage
         }
 
         public override string InvariantName
-            => "SqlAnywhereProvider";
+            => GetType().GetTypeInfo().Assembly.GetName().Name;
 
-        public override IRelationalAnnotationProvider AnnotationProvider
-            => GetService<SqlAnywhereAnnotationProvider>();
+        public override IRelationalAnnotationProvider AnnotationProvider => GetService<SqlAnywhereAnnotationProvider>();
 
-        public override IMemberTranslator CompositeMemberTranslator
-            => GetService<SqlAnyhwereRelationalCompositeMemberTranslator>();
+        public override IMemberTranslator CompositeMemberTranslator => GetService<SqlAnywhereCompositeMemberTranslator>();
 
-        public override IMethodCallTranslator CompositeMethodCallTranslator
-            => GetService<SqlAnyhwereRelationalCompositeMethodCallTranslator>();
+        public override IMethodCallTranslator CompositeMethodCallTranslator => GetService<SqlAnywhereCompositeMethodCallTranslator>();
 
-        public override IDatabaseCreator Creator
-            => GetService<SqlAnywhereDatabaseCreator>();
+        public override IDatabaseCreator Creator => GetService<SqlAnywhereDatabaseCreator>();
 
-        public override IHistoryRepository HistoryRepository
-            => GetService<SqlAnywhereHistoryRepository>();
+        public override IHistoryRepository HistoryRepository => GetService<SqlAnywhereHistoryRepository>();
 
-        public override IModelSource ModelSource
-            => GetService<SqlAnywhereModelSource>();
+        public override IModelSource ModelSource => GetService<SqlAnywhereModelSource>();
 
-        public override IModificationCommandBatchFactory ModificationCommandBatchFactory
-            => GetService<SqlAnyhwereModificationCommandBatchFactory>();
+        public override IModificationCommandBatchFactory ModificationCommandBatchFactory => GetService<SqlAnywhereModificationCommandBatchFactory>();
 
-        public override IQuerySqlGeneratorFactory QuerySqlGeneratorFactory
-            => GetService<SqlAnyhwereQuerySqlGeneratorFactory>();
+        public override IQuerySqlGeneratorFactory QuerySqlGeneratorFactory => GetService<SqlAnywhereQuerySqlGeneratorFactory>();
 
-        public override IRelationalConnection RelationalConnection
-            => GetService<SqlAnywhereConnection>();
+        public override IRelationalConnection RelationalConnection => GetService<SqlAnywhereConnection>();
 
-        public override IRelationalDatabaseCreator RelationalDatabaseCreator
-            => GetService<SqlAnywhereDatabaseCreator>();
+        public override IRelationalDatabaseCreator RelationalDatabaseCreator => GetService<SqlAnywhereDatabaseCreator>();
 
-        public override ISqlGenerationHelper SqlGenerationHelper
-            => GetService<SqlAnywhereSqlGenerationHelper>();
+        public override ISqlGenerationHelper SqlGenerationHelper => GetService<SqlAnywhereSqlGenerationHelper>();
 
-        public override IUpdateSqlGenerator UpdateSqlGenerator
-            => GetService<SqlAnyhwereUpdateSqlGenerator>();
+        public override IUpdateSqlGenerator UpdateSqlGenerator => GetService<SqlAnyhwereUpdateSqlGenerator>();
 
-        public override IValueGeneratorCache ValueGeneratorCache
-            => GetService<SqlAnywhereValueGeneratorCache>();
+        public override IValueGeneratorCache ValueGeneratorCache => GetService<SqlAnywhereValueGeneratorCache>();
 
-        public override IValueGeneratorSelector ValueGeneratorSelector 
-            => GetService<SqlAnywhereValueGeneratorSelector>();
+        public override IValueGeneratorSelector ValueGeneratorSelector => GetService<SqlAnywhereValueGeneratorSelector>();
 
-        public override IModelValidator ModelValidator
-            => GetService<SqlAnywhereModelValidator>();
+        public override IRelationalTypeMapper TypeMapper => GetService<SqlAnywhereTypeMapper>();
+
+        //public override IDatabase Database => GetService<SqlAnywhereDatabase>();
+
+        //public override IModelValidator ModelValidator
+        //    => GetService<SqlAnywhereModelValidator>();
     }
 }

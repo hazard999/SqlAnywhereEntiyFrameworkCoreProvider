@@ -109,9 +109,9 @@
     <Compile Include="Migrations\SqlAnywhereHistoryRepository.cs" />
     <Compile Include="Migrations\SqlAnywhereMigrationsAnnotationProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Query\ExpressionTranslators\Internal\SqlAnyhwereRelationalCompositeMemberTranslator.cs" />
-    <Compile Include="Query\ExpressionTranslators\Internal\SqlAnyhwereRelationalCompositeMethodCallTranslator.cs" />
-    <Compile Include="Query\Sql\SqlAnyhwereQuerySqlGeneratorFactory.cs" />
+    <Compile Include="Query\ExpressionTranslators\Internal\SqlAnywhereCompositeMemberTranslator.cs" />
+    <Compile Include="Query\ExpressionTranslators\Internal\SqlAnywhereCompositeMethodCallTranslator.cs" />
+    <Compile Include="Query\Sql\SqlAnywhereQuerySqlGeneratorFactory.cs" />
     <Compile Include="Storage\SqlAnywhereModelValidator.cs" />
     <Compile Include="Storage\SqlAnywhereSqlGenerationHelper.cs" />
     <Compile Include="Storage\SqlAnywhereDatabase.cs" />
@@ -119,8 +119,9 @@
     <Compile Include="Storage\SqlAnyhwereDatabaseProviderServices.cs" />
     <Compile Include="Storage\SqlAnywhereConnection.cs" />
     <Compile Include="Storage\SqlAnywhereTypeMapper.cs" />
+    <Compile Include="Update\SqlAnywhereModificationCommandBatch.cs" />
     <Compile Include="ValueGeneration\SqlAnywhereValueGeneratorSelector.cs" />
-    <Compile Include="Update\SqlAnyhwereModificationCommandBatchFactory.cs" />
+    <Compile Include="Update\SqlAnywhereModificationCommandBatchFactory.cs" />
     <Compile Include="Update\SqlAnyhwereUpdateSqlGenerator.cs" />
     <Compile Include="ValueGeneration\SqlAnywhereValueGeneratorCache.cs" />
   </ItemGroup>

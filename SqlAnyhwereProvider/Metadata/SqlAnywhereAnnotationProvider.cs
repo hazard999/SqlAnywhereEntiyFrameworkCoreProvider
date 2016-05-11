@@ -17,7 +17,7 @@ namespace EntityFrameworkCore.RelationalProviderStarter.Metadata
 
         public IRelationalPropertyAnnotations For(IProperty property)
         {
-            throw new NotImplementedException();
+            return new RelationalPropertyAnnotations(property, Microsoft.EntityFrameworkCore.Metadata.Internal.RelationalFullAnnotationNames.Instance);
         }
 
         public IRelationalKeyAnnotations For(IKey key)
@@ -32,7 +32,7 @@ namespace EntityFrameworkCore.RelationalProviderStarter.Metadata
 
         public IRelationalEntityTypeAnnotations For(IEntityType entityType)
         {
-            throw new NotImplementedException();
+            return new RelationalEntityTypeAnnotations(entityType, Microsoft.EntityFrameworkCore.Metadata.Internal.RelationalFullAnnotationNames.Instance);            
         }
     }
 }

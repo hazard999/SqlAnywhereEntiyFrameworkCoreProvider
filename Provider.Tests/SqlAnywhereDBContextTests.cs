@@ -13,15 +13,28 @@ namespace Provider.Tests
         }
 
         [TestMethod]
-        public void AddNewBlogPostShouldNotThrow()
+        public void AddNewBlogPostShouldAffect1Record()
         {
             using (var db = new TestDBContext())
             {
                 var blog = new Blog { BlogId = 1, Url = "http://blogs.msdn.com/adonet" };
                 db.Blogs.Add(blog);
-                int count = 0;
-                Should.NotThrow(() => count = db.SaveChanges());
+
+                var count = db.SaveChanges();
+                
                 count.ShouldBe(1);
+            }
+        }
+
+        [TestMethod]
+        public void AddNewBlogPostAutoincrementingShouldNotThrow()
+        {
+            using (var db = new TestDBContext())
+            {
+                var blog = new Blog { Url = "http://blogs.msdn.com/adonet" };
+                db.Blogs.Add(blog);
+                int count = 0;
+                Should.NotThrow(() => count = db.SaveChanges());                
             }
         }
     }

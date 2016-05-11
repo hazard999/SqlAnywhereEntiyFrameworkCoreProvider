@@ -8,9 +8,10 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using SqlAnywhereProvider.Storage;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.ValueGeneration;
 using SqlAnywhereProvider.Migrations;
 using Microsoft.EntityFrameworkCore.Update;
+using EntityFrameworkCore.RelationalProviderStarter.Query.ExpressionTranslators.Internal;
+using EntityFrameworkCore.RelationalProviderStarter.Query.Sql;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -25,7 +26,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             var serviceCollection = new ServiceCollection();
             serviceCollection
-                .AddSingleton<IValueGeneratorCache, SqlAnywhereValueGeneratorCache>()
+                //.AddSingleton<SqlAnywhereDatabase>()
+                .AddSingleton<SqlAnywhereValueGeneratorCache>()
                 .AddSingleton<SqlAnywhereTypeMapper>()
                 .AddSingleton<SqlAnywhereSqlGenerationHelper>()
                 .AddSingleton<SqlAnywhereModelSource>()
@@ -34,31 +36,31 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection
                 .AddScoped<SqlAnywhereConventionSetBuilder>()
-                .AddScoped<IUpdateSqlGenerator, SqlAnyhwereUpdateSqlGenerator>();
+                .AddScoped<SqlAnyhwereUpdateSqlGenerator>();
 
             serviceCollection
-                //.AddScoped<ISqlAnywhereSequenceValueGeneratorFactory, SqlAnywhereSequenceValueGeneratorFactory>()
-                //.AddScoped<SqlAnywhereModificationCommandBatchFactory>()
+                //.AddScoped<SqlAnyhwereCompositeMethodCallTranslator>()
+                //.AddScoped<SqlAnywhereSequenceValueGeneratorFactory>()
+                .AddScoped<SqlAnywhereModificationCommandBatchFactory>()
                 .AddScoped<SqlAnywhereValueGeneratorSelector>()
-                //.AddScoped<SqlAnywhereDatabaseProviderServices>()
-                .AddScoped<IRelationalConnection, SqlAnywhereConnection>()
+                .AddScoped<SqlAnywhereProviderServices>()
+                .AddScoped<SqlAnywhereConnection>()
                 //.AddScoped<SqlAnywhereMigrationsSqlGenerator>()
                 .AddScoped<SqlAnywhereDatabaseCreator>()
-                .AddScoped<SqlAnywhereHistoryRepository>();
+                .AddScoped<SqlAnywhereHistoryRepository>()
             //.AddScoped<SqlAnywhereQueryModelVisitorFactory>()
             //.AddScoped<SqlAnywhereCompiledQueryCacheKeyGenerator>()
-            //.AddQuery();
+                .AddQuery();
 
             services.TryAdd(serviceCollection);
             return services;
         }
 
-        //private static IServiceCollection AddQuery(this IServiceCollection serviceCollection)
-        //=> serviceCollection
-        //    .AddScoped<SqlAnywhereQueryCompilationContextFactory>()
-        //    .AddScoped<SqlAnywhereCompositeMemberTranslator>()
-        //    .AddScoped<SqlAnywhereCompositeMethodCallTranslator>()
-        //    .AddScoped<SqlAnywhereQuerySqlGeneratorFactory>();
-        //}
+        private static IServiceCollection AddQuery(this IServiceCollection serviceCollection)
+        => serviceCollection
+            //.AddScoped<SqlAnywhereQueryCompilationContextFactory>()
+            .AddScoped<SqlAnywhereCompositeMemberTranslator>()
+            .AddScoped<SqlAnywhereCompositeMethodCallTranslator>()
+            .AddScoped<SqlAnywhereQuerySqlGeneratorFactory>();
     }
 }

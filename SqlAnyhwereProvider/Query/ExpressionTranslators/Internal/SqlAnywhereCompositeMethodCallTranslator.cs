@@ -3,9 +3,9 @@ using Microsoft.Extensions.Logging;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Query.ExpressionTranslators.Internal
 {
-    public class SqlAnyhwereRelationalCompositeMethodCallTranslator : RelationalCompositeMethodCallTranslator
+    public class SqlAnywhereCompositeMethodCallTranslator : RelationalCompositeMethodCallTranslator
     {
-        public SqlAnyhwereRelationalCompositeMethodCallTranslator(ILogger logger)
+        public SqlAnywhereCompositeMethodCallTranslator(ILogger<SqlAnywhereCompositeMethodCallTranslator> logger)
             : base(logger)
         {
         }

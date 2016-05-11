@@ -21,7 +21,9 @@ namespace EntityFrameworkCore.RelationalProviderStarter.Update
         protected override void AppendRowsAffectedWhereCondition(StringBuilder commandStringBuilder,
             int expectedRowsAffected)
         {
-            throw new NotImplementedException();
+            commandStringBuilder
+                .Append("@@ROWCOUNT = ")
+                .Append(expectedRowsAffected);
         }
     }
 }
