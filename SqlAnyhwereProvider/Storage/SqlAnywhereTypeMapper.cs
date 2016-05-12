@@ -6,7 +6,7 @@ using System.Data;
 
 namespace SqlAnywhereProvider.Storage
 {
-    class SqlAnywhereTypeMapper : RelationalTypeMapper
+    public class SqlAnywhereTypeMapper : RelationalTypeMapper
     {
         private readonly Dictionary<string, RelationalTypeMapping> _simpleNameMappings;
         private readonly Dictionary<Type, RelationalTypeMapping> _simpleMappings;

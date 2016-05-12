@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using SqlAnywhereProvider.Storage;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using SqlAnywhereProvider.Migrations;
-using Microsoft.EntityFrameworkCore.Update;
 using EntityFrameworkCore.RelationalProviderStarter.Query.ExpressionTranslators.Internal;
 using EntityFrameworkCore.RelationalProviderStarter.Query.Sql;
 

@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Provider.Tests
 {
     public class Blog
     {
+        [Key]
         public int BlogId { get; set; }
         public string Url { get; set; }
 
@@ -16,6 +18,7 @@ namespace Provider.Tests
         public string Title { get; set; }
         public string Content { get; set; }
 
+        [Key]
         public int BlogId { get; set; }
         public Blog Blog { get; set; }
     }

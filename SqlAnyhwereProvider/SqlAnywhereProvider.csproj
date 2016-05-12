@@ -101,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\EntityFrameworkServicesBuilderExtensions.cs" />
+    <Compile Include="Extensions\PropertyExtensions.cs" />
     <Compile Include="Extensions\SqlAnywhereOptionsExtension.cs" />
     <Compile Include="Infrastructure\SqlAnywhereModelSource.cs" />
     <Compile Include="Infrastructure\SqlAnywhereOptionsExtension.cs" />

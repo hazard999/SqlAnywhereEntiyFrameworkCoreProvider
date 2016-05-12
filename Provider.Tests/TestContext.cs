@@ -1,5 +1,6 @@
 ﻿using iAnywhere.Data.SQLAnywhere;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 
 namespace Provider.Tests
 {
@@ -10,14 +11,26 @@ namespace Provider.Tests
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
+            options.UseSqlAnywhere(GetConnectionString());
+            
+        }
+        
+        public DbCommand GetDBCommand()
+        {
+            var conn = new SAConnection(GetConnectionString());
+            conn.Open();
+
+            return conn.CreateCommand();
+        }             
+
+        private string GetConnectionString()
+        {
             var fac = new SAConnectionStringBuilder();
             fac.ServerName = "test";
             fac.UserID = "dba";
             fac.Password = "sql";
             fac.Integrated = "true";
-            var connectionString = fac.ToString();
-
-            options.UseSqlAnywhere(connectionString);
+            return fac.ToString();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -29,10 +42,13 @@ namespace Provider.Tests
                 .HasMaxLength(500)
                 .IsRequired();
 
-            blog.Property(b => b.BlogId)
-                .ValueGeneratedOnAdd()
-                .IsRequired();
+            blog.Property(b => b.BlogId);
+                //.ValueGeneratedOnAdd()
+                //.IsRequired();
 
+            blog.HasKey(f => f.BlogId);
+            blog.HasIndex(f => f.BlogId);
+            
         }
     }
 }

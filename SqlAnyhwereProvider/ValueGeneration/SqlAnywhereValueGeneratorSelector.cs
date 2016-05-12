@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.ValueGeneration;
 
 namespace EntityFrameworkCore.RelationalProviderStarter.Storage
 {
-    internal class SqlAnywhereValueGeneratorSelector : RelationalValueGeneratorSelector
+    public class SqlAnywhereValueGeneratorSelector : RelationalValueGeneratorSelector
     {
         public SqlAnywhereValueGeneratorSelector(IValueGeneratorCache cache, IRelationalAnnotationProvider relationalExtensions) : base(cache, relationalExtensions)
         {

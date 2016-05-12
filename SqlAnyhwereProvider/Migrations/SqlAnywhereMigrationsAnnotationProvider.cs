@@ -2,7 +2,7 @@
 
 namespace SqlAnywhereProvider.Migrations
 {
-    class SqlAnywhereMigrationsAnnotationProvider:MigrationsAnnotationProvider
+    public class SqlAnywhereMigrationsAnnotationProvider:MigrationsAnnotationProvider
     {
     }
 }
