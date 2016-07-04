@@ -1,6 +1,5 @@
 ﻿namespace iAnywhere.Data.SQLAnywhere
 {
-    /// <summary>Summary description for SATime.</summary>
     internal struct SATime
     {
         public ushort Hour;
