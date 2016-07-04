@@ -1,16 +1,7 @@
-﻿
-// Type: iAnywhere.Data.SQLAnywhere.SACommand
-// Assembly: iAnywhere.Data.SQLAnywhere.v4.0, Version=11.0.1.27424, Culture=neutral, PublicKeyToken=f222fc4333e0d400
-// MVID: CC4F9F8C-E618-49D1-9147-C06A9EF53D1F
-// Assembly location: C:\Program Files\SQL Anywhere 11\Assembly\V4\iAnywhere.Data.SQLAnywhere.v4.0.dll
-
-using System;
+﻿using System;
 using System.ComponentModel;
-using System.ComponentModel.Design;
 using System.Data;
 using System.Data.Common;
-using System.Drawing;
-using System.Drawing.Design;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -18,23 +9,13 @@ using System.Threading;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
-    /// <summary>
-    ///     <para>A SQL statement or stored procedure that is executed against a SQL Anywhere database.</para>
-    /// </summary>
-    /// <remarks>
-    ///     <para><b>Implements:</b> <see cref="T:System.ICloneable" /></para>
-    ///     <para>For more information, see @olink targetdoc="programming" targetptr="accessing-adodotnet-dev"@Accessing and manipulating data@/olink@.</para>
-    /// </remarks>
-    [ToolboxBitmap(typeof(SACommand), "Command.bmp")]
-    [Designer("iAnywhere.VSIntegration.SQLAnywhere.CommandDesigner, iAnywhere.VSIntegration.SQLAnywhere, Culture=neutral, PublicKeyToken=f222fc4333e0d400, Version=11.0.1.27424", typeof(IDesigner))]
-    [ToolboxItem("iAnywhere.VSIntegration.SQLAnywhere.CommandToolboxItem, iAnywhere.VSIntegration.SQLAnywhere, Culture=neutral, PublicKeyToken=f222fc4333e0d400, Version=11.0.1.27424")]
-    public sealed class SACommand : DbCommand, ICloneable
+    public sealed class SACommand : DbCommand
     {
         private string[] _allParmNames = new string[0];
         private string[] _inParmNames = new string[0];
         private string[] _outParmNames = new string[0];
         private bool _getOutputParms = true;
-        private int _objectId = SACommand.s_CurrentId++;
+        private int _objectId = s_CurrentId++;
         private int _timeout;
         private bool _designTimeVisible;
         private string _cmdText;
@@ -66,25 +47,14 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        /// <summary>
-        ///     <para>Gets or sets the text of a SQL statement or stored procedure.</para>
-        /// </summary>
-        /// <value>The SQL statement or the name of the stored procedure to execute. The default is an empty string.</value>
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SACommand.#ctor" />
-        [Category("Data")]
-        [DefaultValue("")]
-        [Editor("iAnywhere.VSIntegration.SQLAnywhere.CommandTextEditor, iAnywhere.VSIntegration.SQLAnywhere, Culture=neutral, PublicKeyToken=f222fc4333e0d400, Version=11.0.1.27424", typeof(UITypeEditor))]
-        [Description("Command text to execute.")]
         public override string CommandText
         {
             get
             {
-                SATrace.PropertyCall("<sa.SACommand.get_CommandText|API>", _objectId);
                 return _cmdText;
             }
             set
             {
-                SATrace.PropertyCall("<sa.SACommand.set_CommandText|API>", _objectId);
                 if (!_cmdText.Equals(value))
                     Unprepare();
                 _cmdText = value == null ? "" : value;
@@ -94,69 +64,34 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        /// <summary>
-        ///     <para>This feature is not supported by SQL Anywhere ADO.NET provider.</para>
-        /// </summary>
-        [DefaultValue(30)]
-        [Description("Time to wait for command to execute.")]
         public override int CommandTimeout
         {
             get
             {
-                SATrace.PropertyCall("<sa.SACommand.get_CommandTimeout|API>", _objectId);
                 return _timeout;
             }
             set
             {
-                SATrace.PropertyCall("<sa.SACommand.set_CommandTimeout|API>", _objectId);
                 if (value < 0)
                 {
                     Exception e = new ArgumentException(SARes.GetString(10995, value.ToString()), "value");
-                    SATrace.Exception(e);
                     throw e;
                 }
                 _timeout = value;
             }
         }
 
-        /// <summary>
-        ///     <para>Gets or sets the type of command represented by an SACommand.</para>
-        /// </summary>
-        /// <value>One of the <see cref="T:System.Data.CommandType" /> values. The default is <see cref="F:System.Data.CommandType.Text" />.</value>
-        /// <remarks>
-        ///     <para>Supported command types are as follows: </para>
-        ///     <list type="bullet">
-        ///     <item>
-        ///     <term><see cref="F:System.Data.CommandType.StoredProcedure" /></term> When you specify this CommandType, the command text must be the name of a stored procedure and you must supply any arguments as SAParameter objects.
-        ///     </item>
-        ///     <item>
-        ///     <term><see cref="F:System.Data.CommandType.Text" /></term> This is the default value.
-        ///     </item>
-        ///     </list>
-        ///     <para>When the CommandType property is set to StoredProcedure, the CommandText property should be set to the name of the stored procedure. The command executes this stored procedure when you call one of the Execute methods.</para>
-        ///     <para>Use a question mark (?) placeholder to pass parameters. For example:</para>
-        ///     <code>SELECT * FROM Customers WHERE ID = ?</code>
-        ///     <para>The order in which SAParameter objects are added to the SAParameterCollection must directly correspond to the position of the question mark placeholder for the parameter.</para>
-        /// 
-        /// </remarks>
-        [DefaultValue(CommandType.Text)]
-        [Category("Data")]
-        [Description("How to interpret the CommandText.")]
-        [RefreshProperties(RefreshProperties.All)]
         public override CommandType CommandType
         {
             get
             {
-                SATrace.PropertyCall("<sa.SACommand.get_CommandType|API>", _objectId);
                 return _cmdType;
             }
             set
             {
-                SATrace.PropertyCall("<sa.SACommand.set_CommandType|API>", _objectId);
                 if (value == CommandType.TableDirect)
                 {
                     Exception e = new ArgumentException(SARes.GetString(10996), "value");
-                    SATrace.Exception(e);
                     throw e;
                 }
                 if (_cmdType != value)
@@ -165,122 +100,64 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        /// <summary>
-        ///     <para>Gets or sets the <see cref="T:System.Data.Common.DbConnection" /> used by this SACommand object.</para>
-        /// </summary>
-        /// <returns>
-        /// <para>The connection to the data source.</para>
-        ///    </returns>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SACommand" />
         protected override DbConnection DbConnection
         {
             get
             {
-                SATrace.PropertyCall("<sa.SACommand.get_DbConnection|API>", _objectId);
                 return _conn;
             }
             set
             {
-                SATrace.PropertyCall("<sa.SACommand.set_DbConnection|API>", _objectId);
                 if (_conn != value)
                     Unprepare();
                 _conn = (SAConnection)value;
             }
         }
 
-        /// <summary>
-        ///     <para>Gets or sets the connection object to which the SACommand object applies.</para>
-        /// </summary>
-        /// <value>The default value is a null reference. In Visual Basic it is Nothing.</value>
-        [Editor("iAnywhere.VSIntegration.SQLAnywhere.ConnectionEditor, iAnywhere.VSIntegration.SQLAnywhere, Culture=neutral, PublicKeyToken=f222fc4333e0d400, Version=11.0.1.27424", typeof(UITypeEditor))]
-        [DefaultValue(null)]
-        [Description("Connection used by the command.")]
-        [Category("Behavior")]
         public SAConnection Connection
         {
             get
             {
-                SATrace.PropertyCall("<sa.SACommand.get_Connection|API>", _objectId);
                 return (SAConnection)DbConnection;
             }
             set
             {
-                SATrace.PropertyCall("<sa.SACommand.set_Connection|API>", _objectId);
                 DbConnection = value;
             }
         }
 
-        /// <summary>
-        ///     <para>Gets or sets a value that indicates if the SACommand should be visible in a Windows Form Designer control. The default is true.</para>
-        /// </summary>
-        /// <value>True if this SACommand instance should be visible, false if this instance should not be visible. The default is false.</value>
-        [Browsable(false)]
-        [DesignOnly(true)]
-        [DefaultValue(true)]
         public override bool DesignTimeVisible
         {
             get
             {
-                SATrace.PropertyCall("<sa.SACommand.get_DesignTimeVisible|API>", _objectId);
                 return _designTimeVisible;
             }
             set
             {
-                SATrace.PropertyCall("<sa.SACommand.set_DesignTimeVisible|API>", _objectId);
                 _designTimeVisible = value;
             }
         }
 
-        /// <summary>
-        ///     <para>Gets the collection of <see cref="T:System.Data.Common.DbParameter" /> objects.</para>
-        /// </summary>
-        /// <returns>
-        /// <para>The parameters of the SQL statement or stored procedure.</para>
-        ///    </returns>
         protected override DbParameterCollection DbParameterCollection
         {
             get
             {
-                SATrace.PropertyCall("<sa.SACommand.get_DbParameterCollection|API>", _objectId);
                 return _parms;
             }
         }
 
-        /// <summary>
-        ///     <para>A collection of parameters for the current statement. Use question marks in the CommandText to indicate parameters.</para>
-        /// </summary>
-        /// <value>The parameters of the SQL statement or stored procedure. The default value is an empty collection.</value>
-        /// <remarks>
-        ///     <para>When CommandType is set to Text, pass parameters using the question mark placeholder. For example:</para>
-        ///     <code>SELECT * FROM Customers WHERE ID = ?</code>
-        ///     <para>The order in which SAParameter objects are added to the SAParameterCollection must directly correspond to the position of the question mark placeholder for the parameter in the command text.</para>
-        ///     <para>When the parameters in the collection do not match the requirements of the query to be executed, an error may result or an exception may be thrown.</para>
-        /// 
-        /// </remarks>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameterCollection" />
-        [Description("The parameters collection.")]
-        [Category("Data")]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public SAParameterCollection Parameters
         {
             get
             {
-                SATrace.PropertyCall("<sa.SACommand.get_Parameters|API>", _objectId);
                 return (SAParameterCollection)DbParameterCollection;
             }
         }
 
-        /// <summary>
-        ///     <para>Gets or sets the <see cref="T:System.Data.Common.DbTransaction" /> within which this SACommand object executes.</para>
-        /// </summary>
-        /// <returns>
-        /// <para>The transaction within which a Command object of a .NET Framework data provider executes. The default value is a null reference (Nothing in Visual Basic).</para>
-        ///    </returns>
         protected override DbTransaction DbTransaction
         {
             get
             {
-                SATrace.PropertyCall("<sa.SACommand.get_DbTransaction|API>", _objectId);
                 return _asaTran;
             }
             set
@@ -1298,8 +1175,8 @@ namespace iAnywhere.Data.SQLAnywhere
             }
             return _currentAsyncResult;
         }
-        
-        public unsafe int EndExecuteNonQuery(IAsyncResult asyncResult)
+
+        public int EndExecuteNonQuery(IAsyncResult asyncResult)
         {
             try
             {
@@ -1341,12 +1218,6 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        /// <summary>
-        ///     <para>Executes a statement that returns a single value. If this method is called on a query that returns multiple rows and columns, only the first column of the first row is returned.</para>
-        /// </summary>
-        /// <returns>
-        /// <para>The first column of the first row in the result set, or a null reference if the result set is empty.</para>
-        ///    </returns>
         public override object ExecuteScalar()
         {
             try
@@ -1357,27 +1228,18 @@ namespace iAnywhere.Data.SQLAnywhere
                 {
                     if (saDataReader.Read())
                         obj = saDataReader.GetValue(0);
-                    saDataReader.Close();
                 }
                 return obj;
             }
             finally
             {
-                SATrace.FunctionScopeLeave();
             }
         }
 
-        /// <summary>
-        ///     <para>Cancels the execution of an SACommand object.</para>
-        /// </summary>
-        /// <remarks>
-        ///     <para>If there is nothing to cancel, nothing happens. If there is a command in process, a "Statement interrupted by user" exception is thrown.</para>
-        /// </remarks>
         public override void Cancel()
         {
             try
             {
-                SATrace.FunctionScopeEnter("<sa.SACommand.Cancel|API>", _objectId, new string[0]);
                 if (_isExecuting)
                 {
                     _isExecuting = false;
@@ -1395,7 +1257,6 @@ namespace iAnywhere.Data.SQLAnywhere
             finally
             {
                 ResetAsyncCommand();
-                SATrace.FunctionScopeLeave();
             }
         }
 
@@ -1449,7 +1310,6 @@ namespace iAnywhere.Data.SQLAnywhere
             if (_isExecuting)
             {
                 Exception e = new InvalidOperationException(SARes.GetString(10994));
-                SATrace.Exception(e);
                 throw e;
             }
             _isExecuting = true;
@@ -1461,12 +1321,10 @@ namespace iAnywhere.Data.SQLAnywhere
             if (_conn == null)
             {
                 e = new InvalidOperationException(SARes.GetString(10986, "Connection"));
-                SATrace.Exception(e);
             }
             else if (_conn.GetConnectionState() != ConnectionState.Open)
             {
                 e = new InvalidOperationException(SARes.GetString(10993, _exeMethodName));
-                SATrace.Exception(e);
             }
             else
             {
@@ -1475,20 +1333,17 @@ namespace iAnywhere.Data.SQLAnywhere
                     if (_conn.Transaction != null)
                     {
                         e = new InvalidOperationException(SARes.GetString(11001));
-                        SATrace.Exception(e);
                         goto label_16;
                     }
                 }
                 else if (_conn != _asaTran.Connection)
                 {
                     e = new InvalidOperationException(SARes.GetString(10992));
-                    SATrace.Exception(e);
                     goto label_16;
                 }
                 if (_cmdText == null || _cmdText.Trim().Length < 1)
                 {
                     e = new InvalidOperationException(SARes.GetString(10986, _exeMethodName + ": CommandText"));
-                    SATrace.Exception(e);
                 }
                 else
                 {
@@ -1498,7 +1353,6 @@ namespace iAnywhere.Data.SQLAnywhere
                         if (saParameter.Size == 0 && (saParameter.Direction == ParameterDirection.Output || saParameter.Direction == ParameterDirection.InputOutput) && (saParameter.DbType == DbType.AnsiString || saParameter.DbType == DbType.AnsiStringFixedLength || (saParameter.DbType == DbType.String || saParameter.DbType == DbType.StringFixedLength) || (saParameter.DbType == DbType.Binary || saParameter.DbType == DbType.Xml)))
                         {
                             e = new InvalidOperationException(SARes.GetString(17421, index.ToString()));
-                            SATrace.Exception(e);
                             break;
                         }
                     }
@@ -1604,7 +1458,6 @@ namespace iAnywhere.Data.SQLAnywhere
             if (_conn.AsyncCommand != null)
             {
                 Exception e = new InvalidOperationException(SARes.GetString(18531));
-                SATrace.Exception(e);
                 throw e;
             }
         }
@@ -1614,7 +1467,6 @@ namespace iAnywhere.Data.SQLAnywhere
             if (_currentAsyncResult != null)
             {
                 Exception e = new InvalidOperationException(SARes.GetString(14973));
-                SATrace.Exception(e);
                 throw e;
             }
         }
@@ -1624,19 +1476,16 @@ namespace iAnywhere.Data.SQLAnywhere
             if (asyncResult == null)
             {
                 Exception e = new ArgumentNullException("asyncResult");
-                SATrace.Exception(e);
                 throw e;
             }
             if (_currentAsyncResult == null)
             {
                 Exception e = new InvalidOperationException(SARes.GetString(14974));
-                SATrace.Exception(e);
                 throw e;
             }
             if (_currentAsyncResult != asyncResult)
             {
                 Exception e = new ArgumentException(SARes.GetString(14975), "asyncResult");
-                SATrace.Exception(e);
                 throw e;
             }
             _currentAsyncResult.CheckCommandType(type);

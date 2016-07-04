@@ -1,159 +1,54 @@
-﻿
-// Type: iAnywhere.Data.SQLAnywhere.SAParameterCollection
-// Assembly: iAnywhere.Data.SQLAnywhere.v4.0, Version=11.0.1.27424, Culture=neutral, PublicKeyToken=f222fc4333e0d400
-// MVID: CC4F9F8C-E618-49D1-9147-C06A9EF53D1F
-// Assembly location: C:\Program Files\SQL Anywhere 11\Assembly\V4\iAnywhere.Data.SQLAnywhere.v4.0.dll
-
-using System;
+﻿using System;
 using System.Collections;
-using System.ComponentModel;
 using System.Data;
 using System.Data.Common;
 using System.Runtime.InteropServices;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
-    /// <summary>
-    ///     <para>Represents all parameters to an SACommand object and, optionally, their mapping to a DataSet column.</para>
-    /// </summary>
-    /// <remarks>
-    ///     <para>There is no constructor for SAParameterCollection. You obtain an SAParameterCollection object from the SACommand.Parameters property of an SACommand oject.</para>
-    /// </remarks>
-    /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SACommand" />
-    /// <seealso cref="P:iAnywhere.Data.SQLAnywhere.SACommand.Parameters" />
-    /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameter" />
-    /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameterCollection" />
-    [ListBindable(false)]
-    [Editor("Microsoft.VSDesigner.Data.Design.DBParametersEditor, Microsoft.VSDesigner, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public sealed class SAParameterCollection : DbParameterCollection
     {
         private int _objectId = SAParameterCollection.s_CurrentId++;
         private ArrayList _parms;
         private static int s_CurrentId;
 
-        /// <summary>
-        ///     <para>Returns the number of SAParameter objects in the collection.</para>
-        /// </summary>
-        /// <value>The number of SAParameter objects in the collection.</value>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameter" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameterCollection" />
         public override int Count
         {
             get
             {
-                SATrace.PropertyCall("<sa.SAParameterCollection.get_Count|API>", _objectId);
                 return _parms.Count;
             }
         }
 
-        /// <summary>
-        ///     <para>Gets and sets the SAParameter object at the specified index.</para>
-        /// </summary>
-        /// <value>An SAParameter object.</value>
-        /// <remarks>
-        ///     <para>In C#, this property is the indexer for the SAParameterCollection object.</para>
-        /// </remarks>
-        /// <param name="index">
-        ///     The zero-based index of the parameter to retrieve.
-        /// </param>
-        /// <returns>
-        /// <para>The SAParameter at the specified index.</para>
-        ///    </returns>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameter" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameterCollection" />
         public SAParameter this[int index]
         {
             get
             {
-                SATrace.PropertyCall("<sa.SAParameterCollection.get_this[int]|API>", _objectId);
                 return (SAParameter)GetParameter(index);
             }
             set
             {
-                SATrace.PropertyCall("<sa.SAParameterCollection.set_this[int]|API>", _objectId);
                 SetParameter(index, value);
             }
         }
 
-        /// <summary>
-        ///     <para>Gets and sets the SAParameter object at the specified index.</para>
-        /// </summary>
-        /// <value>An SAParameter object.</value>
-        /// <remarks>
-        ///     <para>In C#, this property is the indexer for the SAParameterCollection object.</para>
-        /// </remarks>
-        /// <param name="parameterName">The name of the parameter to retrieve.</param>
-        /// <returns>
-        /// <para>The SAParameter object with the specified name.</para>
-        ///    </returns>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameter" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameterCollection" />
-        /// <seealso cref="P:iAnywhere.Data.SQLAnywhere.SADataReader.Item(System.Int32)" />
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SADataReader.GetOrdinal(System.String)" />
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SADataReader.GetValue(System.Int32)" />
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SADataReader.GetFieldType(System.Int32)" />
         public SAParameter this[string parameterName]
         {
             get
             {
-                SATrace.PropertyCall("<sa.SAParameterCollection.get_this[string]|API>", _objectId);
                 return (SAParameter)GetParameter(parameterName);
             }
             set
             {
-                SATrace.PropertyCall("<sa.SAParameterCollection.set_this[string]|API>", _objectId);
                 SetParameter(parameterName, value);
             }
         }
 
-        /// <summary>
-        ///     <para>Gets a value that indicates whether the SAParameterCollection object is synchronized.</para>
-        /// </summary>
-        /// <value>True if this collection is synchronized, false otherwise.</value>
-        public override bool IsSynchronized
-        {
-            get
-            {
-                SATrace.PropertyCall("<sa.SAParameterCollection.get_IsSynchronized|API>", _objectId);
-                return false;
-            }
-        }
-
-        /// <summary>
-        ///     <para>Gets an object that can be used to synchronize access to the SAParameterCollection.</para>
-        /// </summary>
         public override object SyncRoot
         {
             get
             {
-                SATrace.PropertyCall("<sa.SAParameterCollection.get_SyncRoot|API>", _objectId);
                 return this;
-            }
-        }
-
-        /// <summary>
-        ///     <para>Gets a value that indicates whether the SAParameterCollection is read-only.</para>
-        /// </summary>
-        /// <value>True if this collection is read-only, false otherwise.</value>
-        public override bool IsReadOnly
-        {
-            get
-            {
-                SATrace.PropertyCall("<sa.SAParameterCollection.get_IsReadOnly|API>", _objectId);
-                return false;
-            }
-        }
-
-        /// <summary>
-        ///     <para>Gets a value that indicates whether the SAParameterCollection has a fixed size.</para>
-        /// </summary>
-        /// <value>True if this collection has a fixed size, false otherwise.</value>
-        public override bool IsFixedSize
-        {
-            get
-            {
-                SATrace.PropertyCall("<sa.SAParameterCollection.get_IsFixedSize|API>", _objectId);
-                return false;
             }
         }
 
@@ -167,7 +62,6 @@ namespace iAnywhere.Data.SQLAnywhere
             if (value == null)
             {
                 Exception e = new ArgumentNullException(arg);
-                SATrace.Exception(e);
                 throw e;
             }
         }
@@ -177,7 +71,6 @@ namespace iAnywhere.Data.SQLAnywhere
             if (!(value is SAParameter))
             {
                 Exception e = new InvalidCastException(SARes.GetString(11014, value.GetType().Name));
-                SATrace.Exception(e);
                 throw e;
             }
         }
