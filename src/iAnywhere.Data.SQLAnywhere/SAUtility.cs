@@ -10,7 +10,7 @@ namespace iAnywhere.Data.SQLAnywhere
             return (str + "\0").ToCharArray();
         }
 
-        public static unsafe IntPtr GetUnmanagedString(string str)
+        public static IntPtr GetUnmanagedString(string str)
         {
             if (str == null)
                 return (IntPtr)0;
