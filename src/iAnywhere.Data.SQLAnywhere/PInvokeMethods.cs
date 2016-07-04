@@ -1,12 +1,8 @@
-﻿
-// Type: iAnywhere.Data.SQLAnywhere.PInvokeMethods
-// Assembly: iAnywhere.Data.SQLAnywhere.v4.0, Version=11.0.1.27424, Culture=neutral, PublicKeyToken=f222fc4333e0d400
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
-    /// <summary>Summary description for PInvodeMethods.</summary>
     internal class PInvokeMethods
     {
         private const string UnmanagedDll = "dbdata11.dll";

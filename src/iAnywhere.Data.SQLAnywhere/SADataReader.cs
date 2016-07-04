@@ -1592,23 +1592,7 @@ namespace iAnywhere.Data.SQLAnywhere
             ++_numOfReadCalls;
             return _hasData;
         }
-
-        /// <summary>
-        ///     <para>This method is not supported. When called, it throws an InvalidOperationException.</para>
-        /// </summary>
-        /// <seealso cref="T:System.InvalidOperationException" />
-        public IDataReader GetData(int i)
-        {
-            try
-            {
-                Exception e = new InvalidOperationException(SARes.GetString(10976, "GetData"));
-                throw e;
-            }
-            finally
-            {
-            }
-        }
-
+        
         /// <summary>Summary description for SAColumnMetaData</summary>
         private struct SAColumnMetaData
         {
