@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Data;
 using System.Data.Common;
 using System.Runtime.InteropServices;
@@ -32,7 +31,6 @@ namespace iAnywhere.Data.SQLAnywhere
         private string _exeMethodName;
         private int _recordsAffected;
         private bool _disposed;
-        private SADataAdapter _adapter;
         private WeakReference _wrReader;
         private SACommand.AsyncCommandCallback _asyncCallback;
         private AsyncCommandResult _currentAsyncResult;
@@ -60,7 +58,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 _cmdText = value == null ? "" : value;
                 if (!SACommand.IsCreateTableStmt(_cmdText))
                     return;
-                _cmdText = SACommand.ModifyCreateTableStmt(_cmdText);
+                _cmdText = ModifyCreateTableStmt(_cmdText);
             }
         }
 
@@ -162,101 +160,45 @@ namespace iAnywhere.Data.SQLAnywhere
             }
             set
             {
-                SATrace.PropertyCall("<sa.SACommand.set_DbTransaction|API>", _objectId);
                 _asaTran = (SATransaction)value;
             }
         }
 
-        /// <summary>
-        ///     <para>Specifies the SATransaction object in which the SACommand executes.</para>
-        /// </summary>
-        /// <value>The default value is a null reference. In Visual Basic, this is Nothing.</value>
-        /// <remarks>
-        ///     <para>You cannot set the Transaction property if it is already set to a specific value and the command is executing. If you set the transaction property to an SATransaction object that is not connected to the same SAConnection object as the SACommand object, an exception will be thrown the next time you attempt to execute a statement.</para>
-        ///     <para>For more information, see @olink targetdoc="programming" targetptr="transaction-adodotnet-development"@Transaction processing@/olink@.</para>
-        /// </remarks>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SATransaction" />
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        [Browsable(false)]
         public SATransaction Transaction
         {
             get
             {
-                SATrace.PropertyCall("<sa.SACommand.get_Transaction|API>", _objectId);
                 return (SATransaction)DbTransaction;
             }
             set
             {
-                SATrace.PropertyCall("<sa.SACommand.set_Transaction|API>", _objectId);
                 DbTransaction = value;
             }
         }
 
-        /// <summary>
-        ///     <para>Gets or sets how command results are applied to the DataRow when used by the Update method of the SADataAdapter.</para>
-        /// </summary>
-        /// <value>
-        /// <para>One of the UpdatedRowSource values. The default value is UpdateRowSource.OutputParameters. If the command is automatically generated, this property is UpdateRowSource.None.</para>
-        ///        </value>
-        /// <remarks>
-        ///     <para>UpdatedRowSource.Both, which returns both resultset and output parameters, is not supported.</para>
-        /// </remarks>
-        [DefaultValue(UpdateRowSource.OutputParameters)]
-        [Category("Behavior")]
-        [Description("When used by an DataAdapter.Update, how command results are applied to the current DataRow.")]
         public override UpdateRowSource UpdatedRowSource
         {
             get
             {
-                SATrace.PropertyCall("<sa.SACommand.get_UpdatedRowSource|API>", _objectId);
                 return _updatedRowSrc;
             }
             set
             {
-                SATrace.PropertyCall("<sa.SACommand.set_UpdatedRowSource|API>", _objectId);
                 _updatedRowSrc = value;
             }
         }
 
-        internal SADataAdapter DataAdapter
-        {
-            get
-            {
-                return _adapter;
-            }
-            set
-            {
-                _adapter = value;
-            }
-        }
-
-        /// <summary>
-        ///     <para>Initializes an SACommand object.</para>
-        /// </summary>
         public SACommand()
         {
             Init();
         }
 
-        /// <summary>
-        ///     <para>Initializes an SACommand object.</para>
-        /// </summary>
-        /// <param name="cmdText">
-        ///     The text of the SQL statement or stored procedure. For parameterized statements, use a question mark (?) placeholder to pass parameters.
-        /// </param>
         public SACommand(string cmdText)
         {
             Init();
             CommandText = cmdText;
         }
 
-        /// <summary>
-        ///     <para>A SQL statement or stored procedure that is executed against a SQL Anywhere database.</para>
-        /// </summary>
-        /// <param name="cmdText">
-        ///     The text of the SQL statement or stored procedure. For parameterized statements, use a question mark (?) placeholder to pass parameters.
-        /// </param>
-        /// <param name="connection">The current connection.</param>
         public SACommand(string cmdText, SAConnection connection)
         {
             Init();
@@ -264,17 +206,6 @@ namespace iAnywhere.Data.SQLAnywhere
             Connection = connection;
         }
 
-        /// <summary>
-        ///     <para>A SQL statement or stored procedure that is executed against a SQL Anywhere database.</para>
-        /// </summary>
-        /// <param name="cmdText">
-        ///     The text of the SQL statement or stored procedure. For parameterized statements, use a question mark (?) placeholder to pass parameters.
-        /// </param>
-        /// <param name="connection">The current connection.</param>
-        /// <param name="transaction">
-        ///     The SATransaction object in which the SAConnection executes.
-        /// </param>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SATransaction" />
         public SACommand(string cmdText, SAConnection connection, SATransaction transaction)
         {
             Init();
@@ -306,32 +237,11 @@ namespace iAnywhere.Data.SQLAnywhere
                 _parms.Add(new SAParameter(parm));
         }
 
-        /// <summary>
-        ///     <para>Destructs an SACommand object.</para>
-        /// </summary>
         ~SACommand()
         {
             Dispose(false);
         }
 
-        object ICloneable.Clone()
-        {
-            SACommand saCommand = new SACommand();
-            saCommand.CommandType = CommandType;
-            saCommand.CommandText = CommandText;
-            saCommand.CommandTimeout = CommandTimeout;
-            saCommand.Connection = Connection;
-            saCommand.Transaction = Transaction;
-            saCommand.UpdatedRowSource = UpdatedRowSource;
-            saCommand.DesignTimeVisible = DesignTimeVisible;
-            foreach (object parameter in (DbParameterCollection)Parameters)
-                saCommand.Parameters.Add((parameter as ICloneable).Clone());
-            return saCommand;
-        }
-
-        /// <summary>
-        ///     <para>Frees the resources associated with the object.</para>
-        /// </summary>
         protected override void Dispose(bool disposing)
         {
             ResetAsyncCommand();
@@ -340,7 +250,7 @@ namespace iAnywhere.Data.SQLAnywhere
             try
             {
                 if (_asyncController != null)
-                    _asyncController.Close();
+                    _asyncController.Dispose();
                 if (disposing)
                 {
                     FreeCommand(true);
@@ -354,7 +264,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        private void FreeCommand(bool checkException)
+        void FreeCommand(bool checkException)
         {
             if (!SAUtility.IsValidId(_idCmd))
                 return;
@@ -366,7 +276,7 @@ namespace iAnywhere.Data.SQLAnywhere
             _idCmd = 0;
         }
 
-        private bool IsCommandCanceled(SAException ex)
+        bool IsCommandCanceled(SAException ex)
         {
             return ex.Errors[0].NativeError == -299;
         }
@@ -376,285 +286,78 @@ namespace iAnywhere.Data.SQLAnywhere
             _wrReader = null;
         }
 
-        private void CheckExistingDataReader()
+        void CheckExistingDataReader()
         {
             if (_wrReader != null && (SADataReader)_wrReader.Target != null)
                 throw new InvalidOperationException(SARes.GetString(17931));
         }
 
-        private static bool IsCreateTableStmt(string sql)
+        static bool IsCreateTableStmt(string sql)
         {
             if (!string.IsNullOrEmpty(sql))
             {
                 sql = sql.TrimStart();
-                if (sql.StartsWith("CREATE ", StringComparison.InvariantCultureIgnoreCase) && sql.Substring(7).TrimStart().StartsWith("TABLE ", StringComparison.InvariantCultureIgnoreCase))
+                if (sql.StartsWith("CREATE ", StringComparison.OrdinalIgnoreCase) && sql.Substring(7).TrimStart().StartsWith("TABLE ", StringComparison.OrdinalIgnoreCase))
                     return true;
             }
             return false;
         }
 
-        private static string ModifyCreateTableStmt(string sql)
+        static string ModifyCreateTableStmt(string sql)
         {
-            string format = "({0}(\\s)*\\((\\s)*-(\\s)*1(\\s)*\\))";
-            string[] strArray1 = new string[3] { "nvarchar", "varbinary", "varchar" };
-            string[] strArray2 = new string[3] { "long nvarchar", "long binary", "long varchar" };
+            var format = "({0}(\\s)*\\((\\s)*-(\\s)*1(\\s)*\\))";
+            string[] strArray1 = { "nvarchar", "varbinary", "varchar" };
+            string[] strArray2 = { "long nvarchar", "long binary", "long varchar" };
             for (int index = 0; index < strArray1.Length; ++index)
                 sql = Regex.Replace(sql, string.Format(format, strArray1[index]), strArray2[index], RegexOptions.IgnoreCase);
             return sql;
         }
 
-        /// <summary>
-        ///     <para>Resets the CommandTimeout property to its default value of 30 seconds.</para>
-        /// </summary>
         public void ResetCommandTimeout()
         {
-            try
-            {
-                SATrace.FunctionScopeEnter("<sa.SACommand.ResetCommandTimeout|API>", _objectId, new string[0]);
-                _timeout = 30;
-            }
-            finally
-            {
-                SATrace.FunctionScopeLeave();
-            }
+            _timeout = 30;
         }
 
-        /// <summary>
-        ///     <para>Creates a new instance of a <see cref="T:System.Data.Common.DbParameter" /> object.</para>
-        /// </summary>
-        /// <returns>
-        /// <para>A <see cref="T:System.Data.Common.DbParameter" /> object.</para>
-        ///    </returns>
         protected override DbParameter CreateDbParameter()
         {
-            try
-            {
-                SATrace.FunctionScopeEnter("<sa.SACommand.CreateDbParameter|API>", _objectId, new string[0]);
-                return new SAParameter();
-            }
-            finally
-            {
-                SATrace.FunctionScopeLeave();
-            }
+            return new SAParameter();
         }
 
-        /// <summary>
-        ///     <para>Provides an SAParameter object for supplying parameters to SACommand objects.</para>
-        /// </summary>
-        /// <remarks>
-        ///     <para>Stored procedures and some other SQL statements can take parameters, indicated in the text of a statement by a question mark (?).</para>
-        ///     <para>The CreateParameter method provides an SAParameter object. You can set properties on the SAParameter to specify the value, data type, and so on for the parameter.</para>
-        /// </remarks>
-        /// <returns>
-        /// <para>A new parameter, as an SAParameter object.</para>
-        ///    </returns>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameter" />
         public SAParameter CreateParameter()
         {
-            try
-            {
-                SATrace.FunctionScopeEnter("<sa.SACommand.CreateParameter|API>", _objectId, new string[0]);
-                return (SAParameter)CreateDbParameter();
-            }
-            finally
-            {
-                SATrace.FunctionScopeLeave();
-            }
+            return (SAParameter)CreateDbParameter();
         }
 
-        /// <summary>
-        ///     <para>Executes the command text against the connection.</para>
-        /// </summary>
-        /// <param name="behavior">
-        ///     An instance of <see cref="T:System.Data.CommandBehavior" />.
-        /// </param>
-        /// <returns>
-        /// <para>A <see cref="T:System.Data.Common.DbDataReader" />.</para>
-        ///    </returns>
         protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
         {
-            try
-            {
-                SATrace.FunctionScopeEnter("<sa.SACommand.ExecuteDbDataReader|API>", _objectId, "behaviour");
-                return _ExecuteReader(behavior, false, false);
-            }
-            finally
-            {
-                SATrace.FunctionScopeLeave();
-            }
+            return _ExecuteReader(behavior, false, false);
         }
 
-        /// <summary>
-        ///     <para>Executes a SQL statement that returns a result set.</para>
-        /// </summary>
-        /// <remarks>
-        ///     <para>The statement is the current SACommand object, with CommandText and Parameters as needed. The SADataReader object is a read-only, forward-only result set. For modifiable result sets, use an SADataAdapter.</para>
-        /// </remarks>
-        /// <returns>
-        /// <para>The result set as an SADataReader object.</para>
-        ///    </returns>
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SACommand.ExecuteNonQuery" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SADataReader" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SADataAdapter" />
-        /// <seealso cref="P:iAnywhere.Data.SQLAnywhere.SACommand.CommandText" />
-        /// <seealso cref="P:iAnywhere.Data.SQLAnywhere.SACommand.Parameters" />
         public SADataReader ExecuteReader()
         {
-            try
-            {
-                SATrace.FunctionScopeEnter("<sa.SACommand.ExecuteReader|API>", _objectId, new string[0]);
-                return _ExecuteReader(CommandBehavior.Default, false, false);
-            }
-            finally
-            {
-                SATrace.FunctionScopeLeave();
-            }
+            return _ExecuteReader(CommandBehavior.Default, false, false);
         }
 
-        /// <summary>
-        ///     <para>Executes a SQL statement that returns a result set.</para>
-        /// </summary>
-        /// <remarks>
-        ///     <para>The statement is the current SACommand object, with CommandText and Parameters as needed. The SADataReader object is a read-only, forward-only result set. For modifiable result sets, use an SADataAdapter.</para>
-        /// </remarks>
-        /// <param name="behavior">
-        ///     One of CloseConnection, Default, KeyInfo, SchemaOnly, SequentialAccess, SingleResult, or SingleRow.
-        ///     <para>For more information about this parameter, see the .NET Framework documentation for CommandBehavior Enumeration.</para>
-        /// </param>
-        /// <returns>
-        /// <para>The result set as an SADataReader object.</para>
-        ///    </returns>
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SACommand.ExecuteNonQuery" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SADataReader" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SADataAdapter" />
-        /// <seealso cref="P:iAnywhere.Data.SQLAnywhere.SACommand.CommandText" />
-        /// <seealso cref="P:iAnywhere.Data.SQLAnywhere.SACommand.Parameters" />
         public SADataReader ExecuteReader(CommandBehavior behavior)
         {
-            try
-            {
-                SATrace.FunctionScopeEnter("<sa.SACommand.ExecuteReader|API>", _objectId, "behavior");
-                return (SADataReader)ExecuteDbDataReader(behavior);
-            }
-            finally
-            {
-                SATrace.FunctionScopeLeave();
-            }
+            return (SADataReader)ExecuteDbDataReader(behavior);
         }
 
-        /// <summary>
-        ///     <para>Initiates the asynchronous execution of a SQL statement or stored procedure that is described by this SACommand, and retrieves one or more result sets from the database server.</para>
-        /// </summary>
-        /// <returns>
-        /// <para>An <see cref="T:System.IAsyncResult" /> that can be used to poll, wait for results, or both; this value is also needed when invoking EndExecuteReader(IAsyncResult), which returns an SADataReader object that can be used to retrieve the returned rows.</para>
-        ///    </returns>
-        /// <exception cref="T:iAnywhere.Data.SQLAnywhere.SAException">
-        ///     <para>Any error that occurred while executing the command text.</para>
-        /// </exception>
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SACommand.EndExecuteReader(System.IAsyncResult)" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SADataReader" />
-        /// <remarks>
-        ///     <para>For asynchronous command, the order of parameters must be consistent with CommandText.</para>
-        /// </remarks>
         public IAsyncResult BeginExecuteReader()
         {
-            try
-            {
-                SATrace.FunctionScopeEnter("<sa.SACommand.BeginExecuteReader|API>", _objectId, new string[0]);
-                return BeginExecuteReader(null, null, CommandBehavior.Default);
-            }
-            finally
-            {
-                SATrace.FunctionScopeLeave();
-            }
+            return BeginExecuteReader(null, null, CommandBehavior.Default);
         }
 
-        /// <summary>
-        ///     <para>Initiates the asynchronous execution of a SQL statement or stored procedure that is described by this SACommand, and retrieves one or more result sets from the server.</para>
-        /// </summary>
-        /// <param name="behavior">
-        ///     A bitwise combination of <see cref="T:System.Data.CommandBehavior" /> flags describing the results of the query and its effect on the connection.
-        /// </param>
-        /// <returns>
-        /// <para>An <see cref="T:System.IAsyncResult" /> that can be used to poll, wait for results, or both; this value is also needed when invoking EndExecuteReader(IAsyncResult), which returns an SADataReader object that can be used to retrieve the returned rows.</para>
-        ///    </returns>
-        /// <exception cref="T:iAnywhere.Data.SQLAnywhere.SAException">
-        ///     <para>Any error that occurred while executing the command text.</para>
-        /// </exception>
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SACommand.EndExecuteReader(System.IAsyncResult)" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SADataReader" />
-        /// <remarks>
-        ///     <para>For asynchronous command, the order of parameters must be consistent with CommandText.</para>
-        /// </remarks>
         public IAsyncResult BeginExecuteReader(CommandBehavior behavior)
         {
-            try
-            {
-                SATrace.FunctionScopeEnter("<sa.SACommand.BeginExecuteReader|API>", _objectId, "behavior");
-                return BeginExecuteReader(null, null, behavior);
-            }
-            finally
-            {
-                SATrace.FunctionScopeLeave();
-            }
+            return BeginExecuteReader(null, null, behavior);
         }
 
-        /// <summary>
-        ///     <para>Initiates the asynchronous execution of a SQL statement that is described by the SACommand object, and retrieves the result set, given a callback procedure and state information.</para>
-        /// </summary>
-        /// <param name="callback">
-        ///     An <see cref="T:System.AsyncCallback" /> delegate that is invoked when the command's execution has completed. Pass null (Nothing in Microsoft Visual Basic) to indicate that no callback is required.
-        /// </param>
-        /// <param name="stateObject">
-        ///     A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback procedure using the <see cref="P:System.IAsyncResult.AsyncState" /> property.
-        /// </param>
-        /// <returns>
-        /// <para>An <see cref="T:System.IAsyncResult" /> that can be used to poll, wait for results, or both; this value is also needed when invoking EndExecuteReader(IAsyncResult), which returns an SADataReader object that can be used to retrieve the returned rows.</para>
-        ///    </returns>
-        /// <exception cref="T:iAnywhere.Data.SQLAnywhere.SAException">
-        ///     <para>Any error that occurred while executing the command text.</para>
-        /// </exception>
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SACommand.EndExecuteReader(System.IAsyncResult)" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SADataReader" />
-        /// <remarks>
-        ///     <para>For asynchronous command, the order of parameters must be consistent with CommandText.</para>
-        /// </remarks>
         public IAsyncResult BeginExecuteReader(AsyncCallback callback, object stateObject)
         {
-            try
-            {
-                SATrace.FunctionScopeEnter("<sa.SACommand.BeginExecuteReader|API>", _objectId, "callback", "stateObject");
-                return BeginExecuteReader(callback, stateObject, CommandBehavior.Default);
-            }
-            finally
-            {
-                SATrace.FunctionScopeLeave();
-            }
+            return BeginExecuteReader(callback, stateObject, CommandBehavior.Default);
         }
 
-        /// <summary>
-        ///     <para>Initiates the asynchronous execution of a SQL statement or stored procedure that is described by this SACommand, and retrieves one or more result sets from the server.</para>
-        /// </summary>
-        /// <param name="callback">
-        ///     An <see cref="T:System.AsyncCallback" /> delegate that is invoked when the command's execution has completed. Pass null (Nothing in Microsoft Visual Basic) to indicate that no callback is required.
-        /// </param>
-        /// <param name="stateObject">
-        ///     A user-defined state object that is passed to the callback procedure. Retrieve this object from within the callback procedure using the <see cref="P:System.IAsyncResult.AsyncState" /> property.
-        /// </param>
-        /// <param name="behavior">
-        ///     A bitwise combination of <see cref="T:System.Data.CommandBehavior" /> flags describing the results of the query and its effect on the connection.
-        /// </param>
-        /// <returns>
-        /// <para>An <see cref="T:System.IAsyncResult" /> that can be used to poll, wait for results, or both; this value is also needed when invoking EndExecuteReader(IAsyncResult), which returns an SADataReader object that can be used to retrieve the returned rows.</para>
-        ///    </returns>
-        /// <exception cref="T:iAnywhere.Data.SQLAnywhere.SAException">
-        ///     <para>Any error that occurred while executing the command text.</para>
-        /// </exception>
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SACommand.EndExecuteReader(System.IAsyncResult)" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SADataReader" />
-        /// <remarks>
-        ///     <para>For asynchronous command, the order of parameters must be consistent with CommandText.</para>
-        /// </remarks>
         public IAsyncResult BeginExecuteReader(AsyncCallback callback, object stateObject, CommandBehavior behavior)
         {
             CheckAsyncNotExecuting();
@@ -675,88 +378,7 @@ namespace iAnywhere.Data.SQLAnywhere
             return _currentAsyncResult;
         }
 
-        /// <summary>
-        ///     <para>Finishes asynchronous execution of a SQL statement or stored procedure, returning the requested SADataReader.</para>
-        /// </summary>
-        /// <remarks>
-        ///             <para>You must call EndExecuteReader once for every call to BeginExecuteReader. The call must be after BeginExecuteReader has returned. ADO.NET is not thread safe; it is your responsibility to ensure that BeginExecuteReader has returned. The IAsyncResult passed to EndExecuteReader must be the same as the one returned from the BeginExecuteReader call that is being completed. It is an error to call EndExecuteReader to end a call to BeginExecuteNonQuery, and vice versa.</para>
-        ///             <para>If an error occurs while executing the command, the exception is thrown when EndExecuteReader is called.</para>
-        ///             <para>There are four ways to wait for execution to complete:</para>
-        ///             <para>(1) Call EndExecuteReader.</para>
-        /// 	    <para>Calling EndExecuteReader blocks until the command completes. For example:</para>
-        ///             <code>SAConnection conn = new SAConnection("DSN=SQL Anywhere 11 Demo");
-        /// conn.Open();
-        /// SACommand cmd = new SACommand( "SELECT * FROM Departments",
-        ///   conn );
-        /// IAsyncResult res = cmd.BeginExecuteReader();
-        /// // perform other work
-        /// // this will block until the command completes
-        /// SADataReader reader = cmd.EndExecuteReader( res );</code>
-        ///             <para>(2) Poll the IsCompleted property of the IAsyncResult.</para>
-        /// 	    <para> You can poll the IsCompleted property of the IAsyncResult. For example:</para>
-        ///             <code>SAConnection conn = new SAConnection("DSN=SQL Anywhere 11 Demo");
-        /// conn.Open();
-        /// SACommand cmd = new SACommand( "SELECT * FROM Departments",
-        ///   conn );
-        /// IAsyncResult res = cmd.BeginExecuteReader();
-        /// while( !res.IsCompleted ) {
-        /// // do other work
-        /// }
-        /// // this will not block because the command is finished
-        /// SADataReader reader = cmd.EndExecuteReader( res );</code>
-        ///             <para>(3) Use the IAsyncResult.AsyncWaitHandle property to get a synchronization object.</para>
-        /// 	    <para>You can use the IAsyncResult.AsyncWaitHandle property to get a synchronization object, and wait on that. For example:</para>
-        ///             <code>SAConnection conn = new SAConnection("DSN=SQL Anywhere 11 Demo");
-        /// conn.Open();
-        /// SACommand cmd = new SACommand( "SELECT * FROM Departments",
-        ///   conn );
-        /// IAsyncResult res = cmd.BeginExecuteReader();
-        /// // perform other work
-        /// WaitHandle wh = res.AsyncWaitHandle;
-        /// wh.WaitOne();
-        /// // this will not block because the command is finished
-        /// SADataReader reader = cmd.EndExecuteReader( res );</code>
-        ///             <para>(4) Specify a callback function when calling BeginExecuteReader</para>
-        /// 	    <para>You can specify a callback function when calling BeginExecuteReader. For example:</para>
-        ///             <code>private void callbackFunction( IAsyncResult ar )
-        /// {
-        ///    SACommand cmd = (SACommand) ar.AsyncState;
-        ///    // this won’t block since the command has completed
-        ///             SADataReader reader = cmd.EndExecuteReader();
-        /// }
-        /// 
-        /// // elsewhere in the code
-        /// private void DoStuff()
-        /// {
-        ///       SAConnection conn = new SAConnection("DSN=SQL Anywhere 11 Demo");
-        ///       conn.Open();
-        ///             SACommand cmd = new SACommand( "SELECT * FROM Departments",
-        ///         conn );
-        ///    IAsyncResult res = cmd.BeginExecuteReader( callbackFunction, cmd );
-        ///    // perform other work.  The callback function will be
-        ///    // called when the command completes
-        /// }</code>
-        ///             <para>The callback function executes in a separate thread, so the usual caveats related to updating the user interface in a threaded program apply.</para>
-        /// 
-        /// 
-        /// 
-        /// 
-        ///         </remarks>
-        /// <param name="asyncResult">
-        ///     The IAsyncResult returned by the call to SACommand.BeginExecuteReader.
-        /// </param>
-        /// <returns>
-        /// <para>An SADataReader object that can be used to retrieve the requested rows (the same behavior as SACommand.ExecuteReader).</para>
-        ///    </returns>
-        /// <exception cref="T:System.ArgumentException">
-        ///     <para>The asyncResult parameter is null (Nothing in Microsoft Visual Basic)</para>
-        /// </exception>
-        /// <exception cref="T:System.InvalidOperationException">
-        ///     <para>The SACommand.EndExecuteReader(IAsyncResult) was called more than once for a single command execution, or the method was mismatched against its execution method.</para>
-        /// </exception>
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SACommand.BeginExecuteReader" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SADataReader" />
-        public unsafe SADataReader EndExecuteReader(IAsyncResult asyncResult)
+        public SADataReader EndExecuteReader(IAsyncResult asyncResult)
         {
             try
             {
@@ -781,7 +403,9 @@ namespace iAnywhere.Data.SQLAnywhere
                 }
                 finally
                 {
-                    _parms.FreeParameterInfo(_currentAsyncResult.ParmCount, (SAParameterDM*)_currentAsyncResult.ParmsDM.ToPointer());
+                    Marshal.FreeHGlobal(_currentAsyncResult.ParmsDM);
+
+                    //_parms.FreeParameterInfo(_currentAsyncResult.ParmCount, (SAParameterDM*).ToPointer());
                     FreeCommand(true);
                     _isExecuting = false;
                     _currentAsyncResult = null;
@@ -793,103 +417,13 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        private void ResetAsyncCommand()
+        void ResetAsyncCommand()
         {
             if (_conn == null || _conn.AsyncCommand != this)
                 return;
             _conn.AsyncCommand = null;
         }
 
-        internal SADataReader ExecuteReaderForSchema()
-        {
-            int count = _parms.Count;
-            Exception e = null;
-            SADataReader saDataReader = null;
-            try
-            {
-                _getOutputParms = false;
-                if (count == 0)
-                {
-                    if (CommandType == CommandType.StoredProcedure)
-                    {
-                        SACommandBuilder.DeriveParameters(this);
-                    }
-                    else
-                    {
-                        for (int index = 0; index < 50; ++index)
-                            _parms.Add("p" + index.ToString(), SADbType.Char);
-                    }
-                    foreach (DbParameter parm in (DbParameterCollection)_parms)
-                        parm.Value = DBNull.Value;
-                }
-                saDataReader = _ExecuteReader(CommandBehavior.SchemaOnly, false, false);
-            }
-            catch (Exception ex)
-            {
-                e = ex;
-            }
-            finally
-            {
-                _getOutputParms = true;
-                if (count == 0)
-                    _parms.Clear();
-            }
-            if (e != null)
-            {
-                throw e;
-            }
-            return saDataReader;
-        }
-
-        /// <summary>
-        ///     <para>Prepares or compiles the SACommand on the data source.</para>
-        /// </summary>
-        /// <remarks>
-        ///     <para>If you call one of the ExecuteNonQuery, ExecuteReader, or ExecuteScalar methods after calling Prepare, any parameter value that is larger than the value specified by the Size property is automatically truncated to the original specified size of the parameter, and no truncation errors are returned.</para>
-        ///     <para>The truncation only happens for the following data types:</para>
-        ///     <list>
-        ///     <item>
-        ///     <term>CHAR</term>
-        ///     </item>
-        ///     <item>
-        ///     <term>VARCHAR</term>
-        ///     </item>
-        ///     <item>
-        ///     <term>LONG VARCHAR</term>
-        ///     </item>
-        ///     <item>
-        ///     <term>TEXT</term>
-        ///     </item>
-        ///     <item>
-        ///     <term>NCHAR</term>
-        ///     </item>
-        ///     <item>
-        ///     <term>NVARCHAR</term>
-        ///     </item>
-        ///     <item>
-        ///     <term>LONG NVARCHAR</term>
-        ///     </item>
-        ///     <item>
-        ///     <term>NTEXT</term>
-        ///     </item>
-        ///     <item>
-        ///     <term>BINARY</term>
-        ///     </item>
-        ///     <item>
-        ///     <term>LONG BINARY</term>
-        ///     </item>
-        ///     <item>
-        ///     <term>VARBINARY</term>
-        ///     </item>
-        ///     <item>
-        ///     <term>IMAGE</term>
-        ///     </item>
-        ///     </list>
-        ///     <para>If the size property is not specified, and so is using the default value, the data is not truncated.</para>
-        /// </remarks>
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SACommand.ExecuteNonQuery" />
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SACommand.ExecuteReader" />
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SACommand.ExecuteScalar" />
         public override void Prepare()
         {
             _exeMethodName = "Prepare";
@@ -900,23 +434,22 @@ namespace iAnywhere.Data.SQLAnywhere
             _isExecuting = false;
         }
 
-        private unsafe void _Prepare()
+        private void _Prepare()
         {
             int count = 0;
             string sqlCommand = GetSQLCommand();
             char[] arParmNames1 = new char[2048];
             char[] arParmNames2 = new char[2048];
             char[] arParmNames3 = new char[2048];
-            SAParameterDM* pParmsDM = (SAParameterDM*)null;
+            SAParameterDM[] pParmsDM = null;
             try
             {
                 _isPrepared = false;
                 FreeCommand(true);
-                _parms.GetParameterInfo(out count, &pParmsDM, false, false, null);
-                fixed (char* chPtr1 = arParmNames1)
-                  fixed (char* chPtr2 = arParmNames2)
-                    fixed (char* chPtr3 = arParmNames3)
-                      SAException.CheckException(PInvokeMethods.AsaCommand_Prepare(ref _idCmd, _conn.InternalConnection.ConnectionId, sqlCommand, count, new IntPtr((void*)pParmsDM), ref _namedParms, new IntPtr((void*)chPtr1), new IntPtr((void*)chPtr2), new IntPtr((void*)chPtr3)));
+                _parms.GetParameterInfo(out count, ref pParmsDM, false, false, null);
+
+                SAException.CheckException(PInvokeMethods.AsaCommand_Prepare(ref _idCmd, _conn.InternalConnection.ConnectionId, sqlCommand, count, pParmsDM.ToIntPtr(), ref _namedParms, arParmNames1.ToIntPr(), arParmNames2.ToIntPr(), arParmNames3.ToIntPr()));
+
                 if (_namedParms)
                 {
                     _allParmNames = GetParameterNames(arParmNames1);
@@ -937,7 +470,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        private void Unprepare()
+        void Unprepare()
         {
             _namedParms = false;
             _allParmNames = new string[0];
@@ -947,7 +480,7 @@ namespace iAnywhere.Data.SQLAnywhere
             _isPrepared = false;
         }
 
-        private string[] GetParameterNames(char[] arParmNames)
+        string[] GetParameterNames(char[] arParmNames)
         {
             string str1 = new string(arParmNames);
             string str2 = str1.Substring(0, str1.IndexOf(char.MinValue));
@@ -956,14 +489,14 @@ namespace iAnywhere.Data.SQLAnywhere
             return str2.Split('\t');
         }
 
-        private unsafe SADataReader _ExecuteReader(CommandBehavior commandBehavior, bool isExecuteScalar, bool isBeginExecuteReader)
+        private SADataReader _ExecuteReader(CommandBehavior commandBehavior, bool isExecuteScalar, bool isBeginExecuteReader)
         {
             int idEx = 0;
             int idReader = 0;
             int count1 = 0;
-            SAParameterDM* pParmsDM = (SAParameterDM*)null;
+            SAParameterDM[] pParmsDM = null;
             int count2 = 0;
-            SAValue* pValues = (SAValue*)null;
+            SAValue[] pValues = null;
             int outputParmCount = 0;
             IntPtr outputParmValues = IntPtr.Zero;
             _exeMethodName = !isBeginExecuteReader ? (!isExecuteScalar ? "ExecuteReader" : "ExecuteScalar") : "BeginExecuteReader";
@@ -975,22 +508,25 @@ namespace iAnywhere.Data.SQLAnywhere
             {
                 if (isBeginExecuteReader)
                 {
-                    _parms.GetParameterInfo(out count1, &pParmsDM, true, _namedParms, _allParmNames);
+                    _parms.GetParameterInfo(out count1, ref pParmsDM, true, _namedParms, _allParmNames);
                     _currentAsyncResult.ParmCount = count1;
-                    _currentAsyncResult.ParmsDM = new IntPtr((void*)pParmsDM);
+                    var intprt = new IntPtr();
+                    Marshal.StructureToPtr(pParmsDM, intprt, true);
+                    _currentAsyncResult.ParmsDM = intprt;
                     _currentAsyncResult.Behavior = commandBehavior;
                     Unprepare();
-                    idEx = PInvokeMethods.AsaCommand_BeginExecuteReaderDirect(ref _idCmd, _conn.InternalConnection.ConnectionId, GetSQLCommand(), count1, new IntPtr((void*)pParmsDM), Marshal.GetFunctionPointerForDelegate((Delegate)_asyncCallback));
+                    idEx = PInvokeMethods.AsaCommand_BeginExecuteReaderDirect(ref _idCmd, _conn.InternalConnection.ConnectionId, GetSQLCommand(), count1, pParmsDM.ToIntPtr(), Marshal.GetFunctionPointerForDelegate(_asyncCallback));
                 }
                 else
                 {
                     if (!_isPrepared || ParameterChanged())
                         _Prepare();
-                    _parms.GetInputParameterValues(out count2, &pValues, _allParmNames, _inParmNames, _namedParms);
+                    _parms.GetInputParameterValues(out count2, ref pValues, _allParmNames, _inParmNames, _namedParms);
                     bool flag = true;
                     while (flag)
                     {
-                        idEx = PInvokeMethods.AsaCommand_ExecuteReader(_idCmd, count2, new IntPtr((void*)pValues), ref outputParmCount, ref outputParmValues, ref idReader, ref _recordsAffected);
+
+                        idEx = PInvokeMethods.AsaCommand_ExecuteReader(_idCmd, count2, pValues.ToIntPtr(), ref outputParmCount, ref outputParmValues, ref idReader, ref _recordsAffected);
                         if (idEx == -1)
                             _Prepare();
                         else
@@ -1009,6 +545,7 @@ namespace iAnywhere.Data.SQLAnywhere
                     return null;
                 SADataReader saDataReader = new SADataReader(_conn, commandBehavior, idReader, _recordsAffected, this);
                 _wrReader = new WeakReference(saDataReader);
+                
                 return saDataReader;
             }
             catch (Exception ex)
@@ -1034,7 +571,7 @@ namespace iAnywhere.Data.SQLAnywhere
             _parmsOld.Clear();
             foreach (SAParameter parm in (DbParameterCollection)_parms)
             {
-                SAParameter saParameter = new SAParameter(parm.ParameterName, parm.SADbType, parm.Size, parm.Direction, parm.IsNullable, parm.Precision, parm.Scale, parm.SourceColumn, parm.SourceVersion, null);
+                SAParameter saParameter = new SAParameter(parm.ParameterName, parm.SADbType, parm.Size, parm.Direction, parm.IsNullable, parm.Precision, parm.Scale, parm.SourceColumn, null);
                 saParameter.Size = parm.Size;
                 _parmsOld.Add(saParameter);
             }
@@ -1052,105 +589,76 @@ namespace iAnywhere.Data.SQLAnywhere
             return false;
         }
 
-        /// <summary>
-        ///     <para>Executes a statement that does not return a result set, such as an INSERT, UPDATE, DELETE, or data definition statement.</para>
-        /// </summary>
-        /// <remarks>
-        ///     <para>You can use ExecuteNonQuery to change the data in a database without using a DataSet. Do this by executing UPDATE, INSERT, or DELETE statements.</para>
-        ///     <para>Although ExecuteNonQuery does not return any rows, output parameters or return values that are mapped to parameters are populated with data.</para>
-        ///     <para>For UPDATE, INSERT, and DELETE statements, the return value is the number of rows affected by the command. For all other types of statements, and for rollbacks, the return value is -1.</para>
-        /// </remarks>
-        /// <returns>
-        /// <para>The number of rows affected.</para>
-        ///    </returns>
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SACommand.ExecuteReader" />
-        public override unsafe int ExecuteNonQuery()
+        public override int ExecuteNonQuery()
         {
+            int idEx = 0;
+            int count1 = 0;
+            SAValue[] pValues = null;
+            int outputParmCount = 0;
+            IntPtr outputParmValues = IntPtr.Zero;
+            bool flag1 = _currentAsyncResult != null;
+            int count2 = 0;
+            SAParameterDM[] pParmsDM = null;
+            _exeMethodName = !flag1 ? "ExecuteNonQuery" : "BeginExecuteNonQuery";
+            CheckAlreadyExecuting();
+            CheckExistingDataReader();
+            Validate();
+            VerifyParameterType();
             try
             {
-                int idEx = 0;
-                int count1 = 0;
-                SAValue* pValues = (SAValue*)null;
-                int outputParmCount = 0;
-                IntPtr outputParmValues = IntPtr.Zero;
-                bool flag1 = _currentAsyncResult != null;
-                int count2 = 0;
-                SAParameterDM* pParmsDM = (SAParameterDM*)null;
-                _exeMethodName = !flag1 ? "ExecuteNonQuery" : "BeginExecuteNonQuery";
-                CheckAlreadyExecuting();
-                CheckExistingDataReader();
-                Validate();
-                VerifyParameterType();
-                try
+                if (flag1)
                 {
-                    if (flag1)
+                    _parms.GetParameterInfo(out count2, ref pParmsDM, true, _namedParms, _allParmNames);
+                    _currentAsyncResult.ParmCount = count2;
+                    _currentAsyncResult.ParmsDM = pParmsDM.ToIntPtr();
+
+                    Unprepare();
+                    idEx = PInvokeMethods.AsaCommand_BeginExecuteNonQueryDirect(ref _idCmd, _conn.InternalConnection.ConnectionId, GetSQLCommand(), count2, pParmsDM.ToIntPtr(), Marshal.GetFunctionPointerForDelegate(_asyncCallback));
+                }
+                else
+                {
+                    if (!_isPrepared || ParameterChanged())
+                        _Prepare();
+                    _parms.GetInputParameterValues(out count1, ref pValues, _allParmNames, _inParmNames, _namedParms);
+                    bool flag2 = true;
+                    while (flag2)
                     {
-                        _parms.GetParameterInfo(out count2, &pParmsDM, true, _namedParms, _allParmNames);
-                        _currentAsyncResult.ParmCount = count2;
-                        _currentAsyncResult.ParmsDM = new IntPtr((void*)pParmsDM);
-                        Unprepare();
-                        idEx = PInvokeMethods.AsaCommand_BeginExecuteNonQueryDirect(ref _idCmd, _conn.InternalConnection.ConnectionId, GetSQLCommand(), count2, new IntPtr((void*)pParmsDM), Marshal.GetFunctionPointerForDelegate((Delegate)_asyncCallback));
-                    }
-                    else
-                    {
-                        if (!_isPrepared || ParameterChanged())
+                        idEx = PInvokeMethods.AsaCommand_ExecuteNonQuery(_idCmd, count1, pValues.ToIntPtr(), ref outputParmCount, ref outputParmValues, ref _recordsAffected);
+                        if (idEx == -1)
                             _Prepare();
-                        _parms.GetInputParameterValues(out count1, &pValues, _allParmNames, _inParmNames, _namedParms);
-                        bool flag2 = true;
-                        while (flag2)
-                        {
-                            idEx = PInvokeMethods.AsaCommand_ExecuteNonQuery(_idCmd, count1, new IntPtr((void*)pValues), ref outputParmCount, ref outputParmValues, ref _recordsAffected);
-                            if (idEx == -1)
-                                _Prepare();
-                            else
-                                flag2 = false;
-                        }
+                        else
+                            flag2 = false;
                     }
-                    if (SAException.IsException(idEx))
-                    {
-                        SAException instance = SAException.CreateInstance(idEx);
-                        throw instance;
-                    }
-                    if (!_isExecuting || flag1)
-                        return -1;
-                    GetParameterValues(outputParmCount, outputParmValues);
                 }
-                catch (Exception ex)
+                if (SAException.IsException(idEx))
                 {
-                    if (flag1)
-                        _parms.FreeParameterInfo(count2, pParmsDM);
-                    _isPrepared = false;
-                    FreeCommand(false);
-                    throw ex;
+                    SAException instance = SAException.CreateInstance(idEx);
+                    throw instance;
                 }
-                finally
-                {
-                    if (!flag1)
-                    {
-                        _parms.FreeParameterValues(count1, pValues);
-                        _isExecuting = false;
-                    }
-                }
-                return _recordsAffected;
+                if (!_isExecuting || flag1)
+                    return -1;
+                GetParameterValues(outputParmCount, outputParmValues);
+            }
+            catch (Exception ex)
+            {
+                if (flag1)
+                    _parms.FreeParameterInfo(count2, pParmsDM);
+                _isPrepared = false;
+                FreeCommand(false);
+                throw ex;
             }
             finally
             {
+                if (!flag1)
+                {
+                    _parms.FreeParameterValues(count1, pValues);
+                    _isExecuting = false;
+                }
             }
+            return _recordsAffected;
+
         }
 
-        /// <summary>
-        ///     <para>Initiates the asynchronous execution of a SQL statement or stored procedure that is described by this SACommand.</para>
-        /// </summary>
-        /// <returns>
-        /// <para>An <see cref="T:System.IAsyncResult" /> that can be used to poll, wait for results, or both; this value is also needed when invoking EndExecuteNonQuery(IAsyncResult), which returns the number of affected rows.</para>
-        ///    </returns>
-        /// <exception cref="T:iAnywhere.Data.SQLAnywhere.SAException">
-        ///     <para>Any error that occurred while executing the command text.</para>
-        /// </exception>
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SACommand.EndExecuteNonQuery(System.IAsyncResult)" />
-        /// <remarks>
-        ///     <para>For asynchronous command, the order of parameters must be consistent with CommandText.</para>
-        /// </remarks>
         public IAsyncResult BeginExecuteNonQuery()
         {
             return BeginExecuteNonQuery(null, null);
@@ -1205,8 +713,8 @@ namespace iAnywhere.Data.SQLAnywhere
                 }
                 finally
                 {
-                    _parms.FreeParameterValues(asyncCommandResult.InputParmCount, (SAValue*)asyncCommandResult.InputParmValues.ToPointer());
-                    _parms.FreeParameterInfo(asyncCommandResult.ParmCount, (SAParameterDM*)asyncCommandResult.ParmsDM.ToPointer());
+                    //_parms.FreeParameterValues(asyncCommandResult.InputParmCount, (SAValue*)asyncCommandResult.InputParmValues.ToPointer());
+                    //_parms.FreeParameterInfo(asyncCommandResult.ParmCount, (SAParameterDM*)asyncCommandResult.ParmsDM.ToPointer());
                     _isExecuting = false;
                     _currentAsyncResult = null;
                 }
@@ -1246,13 +754,7 @@ namespace iAnywhere.Data.SQLAnywhere
                     if (_idCmd < 0)
                         return;
                     SAException.CheckException(PInvokeMethods.AsaCommand_Cancel(_idCmd));
-                }
-                else
-                {
-                    if (DataAdapter == null)
-                        return;
-                    DataAdapter.CancelFill();
-                }
+                }                
             }
             finally
             {
@@ -1383,25 +885,26 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        private unsafe void GetParameterValues(int count, IntPtr pValues)
+        private void GetParameterValues(int count, IntPtr pValues)
         {
             if (count <= 0 || _parms.GetOutputParameterCount() <= 0)
                 return;
             if (_getOutputParms)
             {
                 int index1 = 0;
-                SAValue* saValuePtr = (SAValue*)(void*)pValues;
+
+                var saValuePtr = Marshal.PtrToStructure<SAValue[]>(pValues);
                 if (_namedParms)
                 {
                     for (int index2 = 0; index2 < _outParmNames.GetLength(0); ++index2)
                     {
                         for (int index3 = 0; index3 < _parms.Count; ++index3)
                         {
-                            SAParameter saParameter = _parms[index3];
+                            var saParameter = _parms[index3];
                             if (string.Compare(_outParmNames[index2], saParameter.ParameterName, true) == 0 && saParameter.IsOutputParameter())
                             {
-                                saParameter.Value = SADataConvert.SAToDotNet(saValuePtr->Value, SADataConvert.MapToDotNetType(saParameter.SADbType), saParameter.Size, saParameter.Offset);
-                                ++saValuePtr;
+                                saParameter.Value = SADataConvert.SAToDotNet(saValuePtr[index2].Value, SADataConvert.MapToDotNetType(saParameter.SADbType), saParameter.Size, saParameter.Offset);
+
                                 break;
                             }
                         }
@@ -1414,8 +917,8 @@ namespace iAnywhere.Data.SQLAnywhere
                         while (_parms[index1].Direction == ParameterDirection.Input)
                             ++index1;
                         SAParameter saParameter = _parms[index1];
-                        saParameter.Value = SADataConvert.SAToDotNet(saValuePtr->Value, SADataConvert.MapToDotNetType(saParameter.SADbType), saParameter.Size, saParameter.Offset);
-                        ++saValuePtr;
+                        saParameter.Value = SADataConvert.SAToDotNet(saValuePtr[index2].Value, SADataConvert.MapToDotNetType(saParameter.SADbType), saParameter.Size, saParameter.Offset);
+
                         ++index1;
                     }
                 }
@@ -1492,5 +995,16 @@ namespace iAnywhere.Data.SQLAnywhere
         }
 
         private delegate void AsyncCommandCallback();
+    }
+
+    static class CharExtensions
+    {
+        public static IntPtr ToIntPr(this char[] charArray)
+        {
+            var bytes = Encoding.UTF8.GetBytes(charArray);
+            var ptr = Marshal.AllocHGlobal(charArray.Length);
+            Marshal.Copy(bytes, 0, ptr, bytes.Length);
+            return ptr;
+        }
     }
 }

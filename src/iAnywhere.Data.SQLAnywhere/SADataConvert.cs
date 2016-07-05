@@ -1,10 +1,4 @@
-﻿
-// Type: iAnywhere.Data.SQLAnywhere.SADataConvert
-// Assembly: iAnywhere.Data.SQLAnywhere.v4.0, Version=11.0.1.27424, Culture=neutral, PublicKeyToken=f222fc4333e0d400
-// MVID: CC4F9F8C-E618-49D1-9147-C06A9EF53D1F
-// Assembly location: C:\Program Files\SQL Anywhere 11\Assembly\V4\iAnywhere.Data.SQLAnywhere.v4.0.dll
-
-using System;
+﻿using System;
 using System.Data;
 using System.Runtime.InteropServices;
 
@@ -695,18 +689,19 @@ namespace iAnywhere.Data.SQLAnywhere
             if (SADataConvert.IsString(valIn.SADataType))
             {
                 char[] destination = new char[valIn.Length];
-                Marshal.Copy(valIn.Value, destination, 0, valIn.Length);
+                var source = Marshal.PtrToStructure<char[]>(valIn.Value);
+                source.CopyTo(destination, 0);
+
                 if (offset <= 0 && (size <= 0 || size >= valIn.Length))
                     return destination;
                 int startIndex;
                 int length;
-                SADataConvert.GetStartIndexAndLength(size, offset, valIn.Length, out startIndex, out length);
+                GetStartIndexAndLength(size, offset, valIn.Length, out startIndex, out length);
                 char[] chArray = new char[length];
                 Array.Copy(destination, startIndex, chArray, 0, length);
                 return chArray;
             }
             Exception e = new InvalidCastException(SARes.GetString(11002));
-            SATrace.Exception(e);
             throw e;
         }
 
@@ -726,7 +721,7 @@ namespace iAnywhere.Data.SQLAnywhere
             bytes[7] = num4;
         }
 
-        public static unsafe SADataItem DotNetToSA(SAParameter parm)
+        public static SADataItem DotNetToSA(SAParameter parm)
         {
             int size = parm.Size;
             int offset = parm.Offset;
@@ -738,9 +733,9 @@ namespace iAnywhere.Data.SQLAnywhere
             {
                 case SADbType.BigInt:
                     long num1 = !(obj is long) ? Convert.ToInt64(obj) : (long)obj;
-                    saDataItem.Length = Marshal.SizeOf(typeof(long));
+                    saDataItem.Length = Marshal.SizeOf<long>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    *(long*)(void*)saDataItem.Value = num1;
+                    Marshal.StructureToPtr<long>(num1, saDataItem.Value, true);
                     break;
                 case SADbType.Binary:
                 case SADbType.Image:
@@ -751,7 +746,7 @@ namespace iAnywhere.Data.SQLAnywhere
                         byte[] source = (byte[])obj;
                         int startIndex;
                         int length;
-                        SADataConvert.GetStartIndexAndLength(size, offset, source.Length, out startIndex, out length);
+                        GetStartIndexAndLength(size, offset, source.Length, out startIndex, out length);
                         if (length > 0)
                         {
                             saDataItem.Length = length;
@@ -766,9 +761,9 @@ namespace iAnywhere.Data.SQLAnywhere
                     goto default;
                 case SADbType.Bit:
                     bool flag = !(obj is bool) ? Convert.ToBoolean(obj) : (bool)obj;
-                    saDataItem.Length = Marshal.SizeOf(typeof(bool));
+                    saDataItem.Length = Marshal.SizeOf<bool>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    *(sbyte*)(void*)saDataItem.Value = flag;
+                    Marshal.StructureToPtr<bool>(flag, saDataItem.Value, true);
                     break;
                 case SADbType.Char:
                 case SADbType.LongNVarchar:
@@ -801,92 +796,102 @@ namespace iAnywhere.Data.SQLAnywhere
                     break;
                 case SADbType.Date:
                     DateTime dateTime = !(obj is DateTime) ? Convert.ToDateTime(obj) : (DateTime)obj;
-                    saDataItem.Length = Marshal.SizeOf(typeof(SADate));
+                    saDataItem.Length = Marshal.SizeOf<SADate>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    SADate* saDatePtr = (SADate*)(void*)saDataItem.Value;
-                    saDatePtr->Year = (short)dateTime.Year;
-                    saDatePtr->Month = (ushort)dateTime.Month;
-                    saDatePtr->Day = (ushort)dateTime.Day;
+
+                    var saDatePtr = new SADate();
+                    saDatePtr.Year = (short)dateTime.Year;
+                    saDatePtr.Month = (ushort)dateTime.Month;
+                    saDatePtr.Day = (ushort)dateTime.Day;
+
+                    Marshal.StructureToPtr(saDatePtr, saDataItem.Value, true);
                     break;
                 case SADbType.DateTime:
                 case SADbType.SmallDateTime:
                 case SADbType.TimeStamp:
                     DateTime dt1 = !(obj is DateTime) ? Convert.ToDateTime(obj) : (DateTime)obj;
-                    saDataItem.Length = Marshal.SizeOf(typeof(SADateTime));
+                    saDataItem.Length = Marshal.SizeOf<SADateTime>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    SADateTime* saDateTimePtr = (SADateTime*)(void*)saDataItem.Value;
-                    saDateTimePtr->Year = (short)dt1.Year;
-                    saDateTimePtr->Month = (ushort)dt1.Month;
-                    saDateTimePtr->Day = (ushort)dt1.Day;
-                    saDateTimePtr->Hour = (ushort)dt1.Hour;
-                    saDateTimePtr->Minute = (ushort)dt1.Minute;
-                    saDateTimePtr->Second = (ushort)dt1.Second;
-                    saDateTimePtr->Microsecond = SADataConvert.CaculateMicrosecond(dt1);
+                    SADateTime saDateTimePtr = new SADateTime();
+                    saDateTimePtr.Year = (short)dt1.Year;
+                    saDateTimePtr.Month = (ushort)dt1.Month;
+                    saDateTimePtr.Day = (ushort)dt1.Day;
+                    saDateTimePtr.Hour = (ushort)dt1.Hour;
+                    saDateTimePtr.Minute = (ushort)dt1.Minute;
+                    saDateTimePtr.Second = (ushort)dt1.Second;
+                    saDateTimePtr.Microsecond = CaculateMicrosecond(dt1);
+                    Marshal.StructureToPtr(saDateTimePtr, saDataItem.Value, true);
                     break;
                 case SADbType.Decimal:
                 case SADbType.Money:
                 case SADbType.Numeric:
                 case SADbType.SmallMoney:
-                    Decimal d = !(obj is Decimal) ? Convert.ToDecimal(obj) : (Decimal)obj;
-                    saDataItem.Length = Marshal.SizeOf(typeof(SADecimal));
+                    decimal d = !(obj is decimal) ? Convert.ToDecimal(obj) : (decimal)obj;
+                    saDataItem.Length = Marshal.SizeOf<SADecimal>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    int[] bits = Decimal.GetBits(d);
-                    SADecimal* saDecimalPtr = (SADecimal*)(void*)saDataItem.Value;
-                    saDecimalPtr->Lo = (uint)bits[0];
-                    saDecimalPtr->Mid = (uint)bits[1];
-                    saDecimalPtr->Hi = (uint)bits[2];
-                    saDecimalPtr->Scale = (byte)((bits[3] & 16711680) >> 16);
-                    saDecimalPtr->Sign = (byte)((bits[3] & 4026531840L) >> 31);
+                    int[] bits = decimal.GetBits(d);
+                    SADecimal saDecimalPtr = new SADecimal();
+                    saDecimalPtr.Lo = (uint)bits[0];
+                    saDecimalPtr.Mid = (uint)bits[1];
+                    saDecimalPtr.Hi = (uint)bits[2];
+                    saDecimalPtr.Scale = (byte)((bits[3] & 16711680) >> 16);
+                    saDecimalPtr.Sign = (byte)((bits[3] & 4026531840L) >> 31);
+
+                    Marshal.StructureToPtr(saDecimalPtr, saDataItem.Value, true);
                     break;
                 case SADbType.Double:
                     double num2 = !(obj is double) ? Convert.ToDouble(obj) : (double)obj;
-                    saDataItem.Length = Marshal.SizeOf(typeof(double));
+                    saDataItem.Length = Marshal.SizeOf<double>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    *(double*)(void*)saDataItem.Value = num2;
+                    Marshal.StructureToPtr(num2, saDataItem.Value, true);
                     break;
                 case SADbType.Float:
                 case SADbType.Real:
                     float num3 = !(obj is float) ? Convert.ToSingle(obj) : (float)obj;
-                    saDataItem.Length = Marshal.SizeOf(typeof(float));
+                    saDataItem.Length = Marshal.SizeOf<float>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    *(float*)(void*)saDataItem.Value = num3;
+                    Marshal.StructureToPtr(num3, saDataItem.Value, true);
                     break;
                 case SADbType.Integer:
                     int num4 = !(obj is int) ? Convert.ToInt32(obj) : (int)obj;
-                    saDataItem.Length = Marshal.SizeOf(typeof(int));
+                    saDataItem.Length = Marshal.SizeOf<int>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    *(int*)(void*)saDataItem.Value = num4;
+
+                    Marshal.StructureToPtr(num4, saDataItem.Value, true);
                     break;
                 case SADbType.SmallInt:
                     short num5 = !(obj is short) ? Convert.ToInt16(obj, null) : (short)obj;
-                    saDataItem.Length = Marshal.SizeOf(typeof(short));
+                    saDataItem.Length = Marshal.SizeOf<short>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    *(short*)(void*)saDataItem.Value = num5;
+
+                    Marshal.StructureToPtr(num5, saDataItem.Value, true);
                     break;
                 case SADbType.Time:
-                    saDataItem.Length = Marshal.SizeOf(typeof(SATime));
+                    saDataItem.Length = Marshal.SizeOf<SATime>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    SATime* saTimePtr = (SATime*)(void*)saDataItem.Value;
+                    SATime saTimePtr = new SATime();
                     if (obj is TimeSpan)
                     {
                         TimeSpan ts = (TimeSpan)obj;
-                        saTimePtr->Hour = (ushort)ts.Hours;
-                        saTimePtr->Minute = (ushort)ts.Minutes;
-                        saTimePtr->Second = (ushort)ts.Seconds;
-                        saTimePtr->Microsecond = SADataConvert.CaculateMicrosecond(ts);
+                        saTimePtr.Hour = (ushort)ts.Hours;
+                        saTimePtr.Minute = (ushort)ts.Minutes;
+                        saTimePtr.Second = (ushort)ts.Seconds;
+                        saTimePtr.Microsecond = CaculateMicrosecond(ts);
                         break;
                     }
                     DateTime dt2 = !(obj is DateTime) ? Convert.ToDateTime(obj) : (DateTime)obj;
-                    saTimePtr->Hour = (ushort)dt2.Hour;
-                    saTimePtr->Minute = (ushort)dt2.Minute;
-                    saTimePtr->Second = (ushort)dt2.Second;
-                    saTimePtr->Microsecond = SADataConvert.CaculateMicrosecond(dt2);
+                    saTimePtr.Hour = (ushort)dt2.Hour;
+                    saTimePtr.Minute = (ushort)dt2.Minute;
+                    saTimePtr.Second = (ushort)dt2.Second;
+                    saTimePtr.Microsecond = CaculateMicrosecond(dt2);
+
+                    Marshal.StructureToPtr(saTimePtr, saDataItem.Value, true);
                     break;
                 case SADbType.TinyInt:
                     byte num6 = !(obj is byte) ? Convert.ToByte(obj, null) : (byte)obj;
-                    saDataItem.Length = Marshal.SizeOf(typeof(byte));
+                    saDataItem.Length = Marshal.SizeOf<byte>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    *(sbyte*)(void*)saDataItem.Value = (sbyte)num6;
+                    Marshal.StructureToPtr(num6, saDataItem.Value, true);
                     break;
                 case SADbType.UniqueIdentifier:
                     Guid guid;
@@ -906,21 +911,21 @@ namespace iAnywhere.Data.SQLAnywhere
                     break;
                 case SADbType.UnsignedBigInt:
                     ulong num7 = !(obj is ulong) ? Convert.ToUInt64(obj) : (ulong)obj;
-                    saDataItem.Length = Marshal.SizeOf(typeof(ulong));
+                    saDataItem.Length = Marshal.SizeOf<ulong>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    *(long*)(void*)saDataItem.Value = (long)num7;
+                    Marshal.StructureToPtr(num7, saDataItem.Value, true);
                     break;
                 case SADbType.UnsignedInt:
                     uint num8 = !(obj is uint) ? Convert.ToUInt32(obj) : (uint)obj;
-                    saDataItem.Length = Marshal.SizeOf(typeof(uint));
+                    saDataItem.Length = Marshal.SizeOf<uint>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    *(int*)(void*)saDataItem.Value = (int)num8;
+                    Marshal.StructureToPtr(num8, saDataItem.Value, true);
                     break;
                 case SADbType.UnsignedSmallInt:
                     ushort num9 = !(obj is ushort) ? Convert.ToUInt16(obj) : (ushort)obj;
-                    saDataItem.Length = Marshal.SizeOf(typeof(ushort));
+                    saDataItem.Length = Marshal.SizeOf<ushort>();
                     saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    *(short*)(void*)saDataItem.Value = (short)num9;
+                    Marshal.StructureToPtr(num9, saDataItem.Value, true);
                     break;
                 default:
                     Exception e = new InvalidOperationException(SARes.GetString(10989));
@@ -951,7 +956,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 case DotNetType.DateTime:
                     return typeof(DateTime);
                 case DotNetType.Decimal:
-                    return typeof(Decimal);
+                    return typeof(decimal);
                 case DotNetType.Double:
                     return typeof(double);
                 case DotNetType.Single:
@@ -981,9 +986,9 @@ namespace iAnywhere.Data.SQLAnywhere
 
         public static string GetSADataTypeName(SADbType saDbType)
         {
-            for (int index = 0; index < SADataConvert.s_SADbTypes.GetLength(0); ++index)
-                if (SADataConvert.s_SADbTypes[index] == saDbType)
-                    return SADataConvert.s_SADbTypeNames[index];
+            for (int index = 0; index < s_SADbTypes.GetLength(0); ++index)
+                if (s_SADbTypes[index] == saDbType)
+                    return s_SADbTypeNames[index];
             return null;
         }
 
@@ -995,9 +1000,9 @@ namespace iAnywhere.Data.SQLAnywhere
                     return SADbType.LongVarchar;
                 string strB = typeName.Replace(" ", "");
                 if (strB.Length > 0)
-                    for (int index = 0; index < SADataConvert.s_SADbTypeNames.GetLength(0); ++index)
-                        if (string.Compare(SADataConvert.s_SADbTypeNames[index].Replace(" ", ""), strB, true) == 0)
-                            return SADataConvert.s_SADbTypes[index];
+                    for (int index = 0; index < s_SADbTypeNames.GetLength(0); ++index)
+                        if (string.Compare(s_SADbTypeNames[index].Replace(" ", ""), strB, true) == 0)
+                            return s_SADbTypes[index];
             }
             throw new InvalidOperationException(SARes.GetString(10989));
         }
@@ -1005,11 +1010,11 @@ namespace iAnywhere.Data.SQLAnywhere
         public static SADbType GetSADbTypeFromValue(object val)
         {
             if (val is Enum)
-                return SADataConvert.GetSADbTypeFromEnumValue(val);
+                return GetSADbTypeFromEnumValue(val);
             string name = val.GetType().Name;
-            for (int index = 0; (System.ValueType)SADataConvert.s_mapDotNetTypeToSAType[index] != null; ++index)
-                if (SADataConvert.s_mapDotNetTypeToSAType[index]._dotNetTypeName.Equals(name))
-                    return SADataConvert.s_mapDotNetTypeToSAType[index]._asaDbType;
+            for (int index = 0; (ValueType)s_mapDotNetTypeToSAType[index] != null; ++index)
+                if (s_mapDotNetTypeToSAType[index]._dotNetTypeName.Equals(name))
+                    return s_mapDotNetTypeToSAType[index]._asaDbType;
             Exception e = new InvalidOperationException(SARes.GetString(10989));
             throw e;
         }
@@ -1021,7 +1026,7 @@ namespace iAnywhere.Data.SQLAnywhere
 
         public static bool IsBinary(string dataType)
         {
-            return SADataConvert.IsBinary((int)SADataConvert.GetSADbType(dataType));
+            return IsBinary((int)GetSADbType(dataType));
         }
 
         public static bool IsDateOrTime(string dataType)
@@ -1037,7 +1042,7 @@ namespace iAnywhere.Data.SQLAnywhere
 
         public static bool IsDecimal(string dataType)
         {
-            return SADataConvert.IsDecimal((int)SADataConvert.GetSADbType(dataType));
+            return IsDecimal((int)GetSADbType(dataType));
         }
 
         public static bool IsLong(int asaType)
@@ -1047,7 +1052,7 @@ namespace iAnywhere.Data.SQLAnywhere
 
         public static bool IsLong(string dataType)
         {
-            return SADataConvert.IsLong((int)SADataConvert.GetSADbType(dataType));
+            return IsLong((int)GetSADbType(dataType));
         }
 
         public static bool IsNumber(int asaType)
@@ -1057,7 +1062,7 @@ namespace iAnywhere.Data.SQLAnywhere
 
         public static bool IsNumber(string dataType)
         {
-            return SADataConvert.IsNumber((int)SADataConvert.GetSADbType(dataType));
+            return IsNumber((int)GetSADbType(dataType));
         }
 
         public static bool IsString(int asaType)
@@ -1067,7 +1072,7 @@ namespace iAnywhere.Data.SQLAnywhere
 
         public static bool IsString(string dataType)
         {
-            return SADataConvert.IsString((int)SADataConvert.GetSADbType(dataType));
+            return IsString((int)GetSADbType(dataType));
         }
 
         public static bool IsTimeStamp(int asaType)
@@ -1077,40 +1082,37 @@ namespace iAnywhere.Data.SQLAnywhere
 
         public static bool IsTimeStamp(string dataType)
         {
-            return SADataConvert.IsTimeStamp((int)SADataConvert.GetSADbType(dataType));
+            return IsTimeStamp((int)GetSADbType(dataType));
         }
 
         public static DbType MapToDbType(SADbType asaDbType)
         {
-            for (int index = 0; (System.ValueType)SADataConvert.s_mapSADbTypeToDbType[index] != null; ++index)
-                if (SADataConvert.s_mapSADbTypeToDbType[index]._asaDbType == asaDbType)
-                    return SADataConvert.s_mapSADbTypeToDbType[index]._dbType;
+            for (int index = 0; (ValueType)s_mapSADbTypeToDbType[index] != null; ++index)
+                if (s_mapSADbTypeToDbType[index]._asaDbType == asaDbType)
+                    return s_mapSADbTypeToDbType[index]._dbType;
             Exception e = new InvalidOperationException(SARes.GetString(10989));
-            SATrace.Exception(e);
             throw e;
         }
 
         public static DotNetType MapToDotNetType(SADbType asaDbType)
         {
-            for (int index = 0; (System.ValueType)SADataConvert.s_mapSADbTypeToDotNetType[index] != null; ++index)
-                if (SADataConvert.s_mapSADbTypeToDotNetType[index]._asaDbType == asaDbType)
-                    return SADataConvert.s_mapSADbTypeToDotNetType[index]._dotNetType;
+            for (int index = 0; (ValueType)s_mapSADbTypeToDotNetType[index] != null; ++index)
+                if (s_mapSADbTypeToDotNetType[index]._asaDbType == asaDbType)
+                    return s_mapSADbTypeToDotNetType[index]._dotNetType;
             Exception e = new InvalidOperationException(SARes.GetString(10989));
-            SATrace.Exception(e);
             throw e;
         }
 
         public static SADbType MapToSADbType(DbType dbType)
         {
-            for (int index = 0; (System.ValueType)SADataConvert.s_mapDbTypeToSADbType[index] != null; ++index)
-                if (SADataConvert.s_mapDbTypeToSADbType[index]._dbType == dbType)
-                    return SADataConvert.s_mapDbTypeToSADbType[index]._asaDbType;
+            for (int index = 0; (ValueType)s_mapDbTypeToSADbType[index] != null; ++index)
+                if (s_mapDbTypeToSADbType[index]._dbType == dbType)
+                    return s_mapDbTypeToSADbType[index]._asaDbType;
             Exception e = new InvalidOperationException(SARes.GetString(10990));
-            SATrace.Exception(e);
             throw e;
         }
 
-        public static unsafe object SAToDotNet(SADataItem valIn, DotNetType dotNetType)
+        public static object SAToDotNet(SADataItem valIn, DotNetType dotNetType)
         {
             if (valIn.IsNull == 1)
                 return DBNull.Value;
@@ -1118,116 +1120,116 @@ namespace iAnywhere.Data.SQLAnywhere
             {
                 case DotNetType.Boolean:
                     if (valIn.SADataType == 3)
-                        return (bool)*(sbyte*)(void*)valIn.Value;
+                        return Marshal.PtrToStructure<bool>(valIn.Value);
                     break;
                 case DotNetType.Byte:
                     if (valIn.SADataType == 29)
-                        return *(byte*)(void*)valIn.Value;
+                        return Marshal.PtrToStructure<byte>(valIn.Value);
                     break;
                 case DotNetType.Bytes:
-                    if (SADataConvert.IsBinary(valIn.SADataType))
+                    if (IsBinary(valIn.SADataType))
                     {
                         byte[] destination = new byte[valIn.Length];
-                        if (valIn.Length > 0)
-                            Marshal.Copy(valIn.Value, destination, 0, valIn.Length);
+                        Marshal.Copy(valIn.Value, destination, 0, valIn.Length);
                         return destination;
                     }
                     break;
                 case DotNetType.Char:
-                    if (SADataConvert.IsString(valIn.SADataType) && valIn.Length > 0)
-                        return (char)*(ushort*)(void*)valIn.Value;
+                    if (IsString(valIn.SADataType) && valIn.Length > 0)
+                        return (char)valIn.Value;
                     break;
                 case DotNetType.Chars:
-                    if (SADataConvert.IsString(valIn.SADataType))
-                        return new string((char*)(void*)valIn.Value).ToCharArray();
+                    if (IsString(valIn.SADataType))
+                        return Marshal.PtrToStringUni(valIn.Value);
                     break;
                 case DotNetType.DateTime:
                     if (valIn.SADataType == 5)
                     {
-                        SADate* saDatePtr = (SADate*)(void*)valIn.Value;
-                        return new DateTime((int)saDatePtr->Year, (int)saDatePtr->Month, (int)saDatePtr->Day);
+                        SADate saDatePtr = Marshal.PtrToStructure<SADate>(valIn.Value);
+                        return new DateTime(saDatePtr.Year, saDatePtr.Month, saDatePtr.Day);
                     }
                     if (valIn.SADataType == 27)
                     {
-                        SATime* saTimePtr = (SATime*)(void*)valIn.Value;
-                        return SADataConvert.CaculateDateTime(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, (int)saTimePtr->Hour, (int)saTimePtr->Minute, (int)saTimePtr->Second), saTimePtr->Microsecond);
+                        SATime saTimePtr = Marshal.PtrToStructure<SATime>(valIn.Value);
+                        return SADataConvert.CaculateDateTime(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, saTimePtr.Hour, saTimePtr.Minute, saTimePtr.Second), saTimePtr.Microsecond);
                     }
-                    if (SADataConvert.IsTimeStamp(valIn.SADataType))
+                    if (IsTimeStamp(valIn.SADataType))
                     {
-                        SADateTime* saDateTimePtr = (SADateTime*)(void*)valIn.Value;
-                        return SADataConvert.CaculateDateTime(new DateTime((int)saDateTimePtr->Year, (int)saDateTimePtr->Month, (int)saDateTimePtr->Day, (int)saDateTimePtr->Hour, (int)saDateTimePtr->Minute, (int)saDateTimePtr->Second), saDateTimePtr->Microsecond);
+                        var saDateTimePtr = Marshal.PtrToStructure<SADateTime>(valIn.Value);
+                        return CaculateDateTime(new DateTime(saDateTimePtr.Year, saDateTimePtr.Month, saDateTimePtr.Day, saDateTimePtr.Hour, saDateTimePtr.Minute, saDateTimePtr.Second), saDateTimePtr.Microsecond);
                     }
                     break;
                 case DotNetType.Decimal:
-                    if (SADataConvert.IsDecimal(valIn.SADataType))
+                    if (IsDecimal(valIn.SADataType))
                     {
-                        SADecimal* saDecimalPtr = (SADecimal*)(void*)valIn.Value;
-                        bool isNegative = (saDecimalPtr->Sign) == 1;
-                        return new Decimal((int)saDecimalPtr->Lo, (int)saDecimalPtr->Mid, (int)saDecimalPtr->Hi, isNegative, saDecimalPtr->Scale);
+                        SADecimal saDecimalPtr = Marshal.PtrToStructure<SADecimal>(valIn.Value);
+                        bool isNegative = (saDecimalPtr.Sign) == 1;
+                        return new decimal((int)saDecimalPtr.Lo, (int)saDecimalPtr.Mid, (int)saDecimalPtr.Hi, isNegative, saDecimalPtr.Scale);
                     }
                     break;
                 case DotNetType.Double:
                     if (valIn.SADataType == 8)
-                        return *(double*)(void*)valIn.Value;
+                        return Marshal.PtrToStructure<double>(valIn.Value);
                     break;
                 case DotNetType.Single:
                     if (valIn.SADataType == 9 || valIn.SADataType == 21)
-                        return *(float*)(void*)valIn.Value;
+                        return Marshal.PtrToStructure<float>(valIn.Value);
                     break;
                 case DotNetType.Guid:
                     if (valIn.SADataType == 30 || valIn.SADataType == 2)
                     {
                         byte[] numArray = new byte[valIn.Length];
                         Marshal.Copy(valIn.Value, numArray, 0, valIn.Length);
-                        SADataConvert.UuidSwapBytes(numArray);
+
+                        UuidSwapBytes(numArray);
                         return new Guid(numArray);
                     }
-                    if (SADataConvert.IsString(valIn.SADataType))
-                        return new Guid(new string((char*)(void*)valIn.Value));
+                    if (IsString(valIn.SADataType))
+                        return new Guid(Marshal.PtrToStringUni(valIn.Value));
                     break;
                 case DotNetType.Int16:
                     if (valIn.SADataType == 23)
-                        return *(short*)(void*)valIn.Value;
+                        return Marshal.PtrToStructure<short>(valIn.Value);
                     break;
                 case DotNetType.Int32:
                     if (valIn.SADataType == 11)
-                        return *(int*)(void*)valIn.Value;
+                        return Marshal.PtrToStructure<int>(valIn.Value);
                     break;
                 case DotNetType.Int64:
                     if (valIn.SADataType == 1)
-                        return *(long*)(void*)valIn.Value;
+                        return Marshal.PtrToStructure<long>(valIn.Value);
                     break;
                 case DotNetType.String:
-                    if (SADataConvert.IsString(valIn.SADataType))
-                        return new string((char*)(void*)valIn.Value);
+                    if (IsString(valIn.SADataType))
+                        return Marshal.PtrToStringUni(valIn.Value);
                     break;
                 case DotNetType.TimeSpan:
                     if (valIn.SADataType == 27)
                     {
-                        SATime* saTimePtr = (SATime*)(void*)valIn.Value;
-                        return SADataConvert.CaculateTimeSpan(new TimeSpan(0, (int)saTimePtr->Hour, (int)saTimePtr->Minute, (int)saTimePtr->Second), saTimePtr->Microsecond);
+                        SATime saTimePtr = Marshal.PtrToStructure<SATime>(valIn.Value);
+                        return CaculateTimeSpan(new TimeSpan(0, saTimePtr.Hour, saTimePtr.Minute, saTimePtr.Second), saTimePtr.Microsecond);
                     }
-                    if (SADataConvert.IsTimeStamp(valIn.SADataType))
+                    if (IsTimeStamp(valIn.SADataType))
                     {
-                        SADateTime* saDateTimePtr = (SADateTime*)(void*)valIn.Value;
-                        return SADataConvert.CaculateTimeSpan(new TimeSpan(0, (int)saDateTimePtr->Hour, (int)saDateTimePtr->Minute, (int)saDateTimePtr->Second), saDateTimePtr->Microsecond);
+                        SADateTime saDateTimePtr = Marshal.PtrToStructure<SADateTime>(valIn.Value);
+                        return CaculateTimeSpan(new TimeSpan(0, saDateTimePtr.Hour, saDateTimePtr.Minute, saDateTimePtr.Second), saDateTimePtr.Microsecond);
                     }
                     break;
                 case DotNetType.UInt16:
                     if (valIn.SADataType == 34)
-                        return *(ushort*)(void*)valIn.Value;
+                        return Marshal.PtrToStructure<ushort>(valIn.Value);
                     break;
                 case DotNetType.UInt32:
                     if (valIn.SADataType == 33)
-                        return *(uint*)(void*)valIn.Value;
+                        return Marshal.PtrToStructure<uint>(valIn.Value);
                     break;
                 case DotNetType.UInt64:
                     if (valIn.SADataType == 32)
-                        return (ulong)*(long*)(void*)valIn.Value;
+                        return (ulong)Marshal.PtrToStructure<long>(valIn.Value);
                     break;
             }
             Exception e = new InvalidCastException(SARes.GetString(11002));
-            SATrace.Exception(e);
+
             throw e;
         }
 
@@ -1236,29 +1238,29 @@ namespace iAnywhere.Data.SQLAnywhere
             if (valIn.IsNull == 1)
                 return DBNull.Value;
             if (dotNetType == DotNetType.String)
-                return new string(SADataConvert.SAToChars(valIn, dotNetType, size, offset));
+                return new string(SAToChars(valIn, dotNetType, size, offset));
             if (dotNetType == DotNetType.Chars)
-                return SADataConvert.SAToChars(valIn, dotNetType, size, offset);
+                return SAToChars(valIn, dotNetType, size, offset);
             if (dotNetType != DotNetType.Bytes)
-                return SADataConvert.SAToDotNet(valIn, dotNetType);
-            if (SADataConvert.IsBinary(valIn.SADataType))
+                return SAToDotNet(valIn, dotNetType);
+            if (IsBinary(valIn.SADataType))
             {
                 byte[] destination = new byte[valIn.Length];
                 if (valIn.Length == 0)
                     return destination;
-                Marshal.Copy(valIn.Value, destination, 0, valIn.Length);
+                var source = Marshal.PtrToStructure<byte[]>(valIn.Value);
+                source.CopyTo(destination, 0);
                 if (offset <= 0 && (size <= 0 || size >= valIn.Length))
                     return destination;
                 int startIndex;
                 int length;
-                SADataConvert.GetStartIndexAndLength(size, offset, valIn.Length, out startIndex, out length);
+                GetStartIndexAndLength(size, offset, valIn.Length, out startIndex, out length);
                 byte[] numArray = new byte[length];
                 Array.Copy(destination, startIndex, numArray, 0, length);
                 return numArray;
             }
-            Exception e = new InvalidCastException(SARes.GetString(11002));
-            SATrace.Exception(e);
-            throw e;
+
+            throw new InvalidCastException(SARes.GetString(11002));
         }
 
         private struct MapDbTypeToSADbType
@@ -1312,7 +1314,7 @@ namespace iAnywhere.Data.SQLAnywhere
         private static SADataConvert.MapSADbTypeToDbType[] s_mapSADbTypeToDbType = null;
         private static SADataConvert.MapDotNetTypeToSAType[] s_mapDotNetTypeToSAType = null;
         private static SADataConvert.MapSADbTypeToDotNetType[] s_mapSADbTypeToDotNetType = null;
-        private static SADbType[] s_SADbTypes = new SADbType[38] { SADbType.BigInt, SADbType.Binary, SADbType.Bit, SADbType.Char, SADbType.Date, SADbType.DateTime, SADbType.Decimal, SADbType.Double, SADbType.Float, SADbType.Image, SADbType.Integer, SADbType.LongBinary, SADbType.LongNVarchar, SADbType.LongVarbit, SADbType.LongVarchar, SADbType.Money, SADbType.NChar, SADbType.NText, SADbType.Numeric, SADbType.NVarChar, SADbType.Real, SADbType.SmallDateTime, SADbType.SmallInt, SADbType.SmallMoney, SADbType.SysName, SADbType.Text, SADbType.Time, SADbType.TimeStamp, SADbType.TinyInt, SADbType.UniqueIdentifier, SADbType.UniqueIdentifierStr, SADbType.UnsignedBigInt, SADbType.UnsignedInt, SADbType.UnsignedSmallInt, SADbType.VarBinary, SADbType.VarBit, SADbType.VarChar, SADbType.Xml };
-        private static string[] s_SADbTypeNames = new string[38] { "bigint", "binary", "bit", "char", "date", "datetime", "decimal", "double", "float", "image", "integer", "long binary", "long nvarchar", "long varbit", "long varchar", "money", "nchar", "ntext", "numeric", "nvarchar", "real", "smalldatetime", "smallint", "smallmoney", "sysname", "text", "time", "timestamp", "tinyint", "uniqueidentifier", "uniqueidentifierstr", "unsigned bigint", "unsigned int", "unsigned smallint", "varbinary", "varbit", "varchar", "xml" };
+        private static SADbType[] s_SADbTypes = { SADbType.BigInt, SADbType.Binary, SADbType.Bit, SADbType.Char, SADbType.Date, SADbType.DateTime, SADbType.Decimal, SADbType.Double, SADbType.Float, SADbType.Image, SADbType.Integer, SADbType.LongBinary, SADbType.LongNVarchar, SADbType.LongVarbit, SADbType.LongVarchar, SADbType.Money, SADbType.NChar, SADbType.NText, SADbType.Numeric, SADbType.NVarChar, SADbType.Real, SADbType.SmallDateTime, SADbType.SmallInt, SADbType.SmallMoney, SADbType.SysName, SADbType.Text, SADbType.Time, SADbType.TimeStamp, SADbType.TinyInt, SADbType.UniqueIdentifier, SADbType.UniqueIdentifierStr, SADbType.UnsignedBigInt, SADbType.UnsignedInt, SADbType.UnsignedSmallInt, SADbType.VarBinary, SADbType.VarBit, SADbType.VarChar, SADbType.Xml };
+        private static string[] s_SADbTypeNames = { "bigint", "binary", "bit", "char", "date", "datetime", "decimal", "double", "float", "image", "integer", "long binary", "long nvarchar", "long varbit", "long varchar", "money", "nchar", "ntext", "numeric", "nvarchar", "real", "smalldatetime", "smallint", "smallmoney", "sysname", "text", "time", "timestamp", "tinyint", "uniqueidentifier", "uniqueidentifierstr", "unsigned bigint", "unsigned int", "unsigned smallint", "varbinary", "varbit", "varchar", "xml" };
     }
 }

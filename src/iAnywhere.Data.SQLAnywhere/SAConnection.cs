@@ -13,7 +13,7 @@ namespace iAnywhere.Data.SQLAnywhere
         private static SAUnmanagedDll s_unmanagedDll = SAUnmanagedDll.Instance;
         private static int s_currentId = 0;
         private static int s_openCount = 0;
-        private static string[] s_keyValuePatterns = new string[4] { "((;|^)(\\s)*{0}(\\s)*=(\\s)*{{(\\s|\\S)*}}(\\s)*([^;])*)", "((;|^)(\\s)*{0}(\\s)*=(\\s)*'(('')|[^'])*'(\\s)*([^;])*)", "((;|^)(\\s)*{0}(\\s)*=(\\s)*\"((\"\")|[^\"])*\"(\\s)*([^;])*)", "((;|^)(\\s)*{0}(\\s)*=([^;])*([^;])*)" };
+        private static string[] s_keyValuePatterns = { "((;|^)(\\s)*{0}(\\s)*=(\\s)*{{(\\s|\\S)*}}(\\s)*([^;])*)", "((;|^)(\\s)*{0}(\\s)*=(\\s)*'(('')|[^'])*'(\\s)*([^;])*)", "((;|^)(\\s)*{0}(\\s)*=(\\s)*\"((\"\")|[^\"])*\"(\\s)*([^;])*)", "((;|^)(\\s)*{0}(\\s)*=([^;])*([^;])*)" };
         private static SAConnectionPoolManager s_poolManager = new SAConnectionPoolManager();
         private static Hashtable s_connStrCacheTable = new Hashtable();
         private static Hashtable s_asaConnStrCached = new Hashtable();
@@ -247,7 +247,7 @@ namespace iAnywhere.Data.SQLAnywhere
         {
             char[] chArray = new char[2] { '.', '/' };
             string[] strArray = Regex.Match(verStr, "([0-9]{1,2})(.[0-9]{1,2})(.[0-9]{1,2})(.[0-9]{1,4})").Value.Split(chArray);
-            return string.Format("{0}.{1}.{2}.{3}", GetNormalizedVersion(strArray[0], 2), SAMetaDataCollectionNames.GetNormalizedVersion(strArray[1], 2), SAMetaDataCollectionNames.GetNormalizedVersion(strArray[2], 2), SAMetaDataCollectionNames.GetNormalizedVersion(strArray[3], 4));
+            return string.Format("{0}.{1}.{2}.{3}", GetNormalizedVersion(strArray[0], 2), GetNormalizedVersion(strArray[1], 2), GetNormalizedVersion(strArray[2], 2), GetNormalizedVersion(strArray[3], 4));
         }
 
         internal static string GetNormalizedVersion(string ver, int len)
@@ -384,72 +384,22 @@ namespace iAnywhere.Data.SQLAnywhere
             return _state;
         }
 
-        /// <summary>
-        ///     <para>Starts a database transaction.</para>
-        /// </summary>
-        /// <param name="isolationLevel">
-        ///     Specifies the isolation level for the transaction.
-        /// </param>
-        /// <returns>
-        /// <para>An object representing the new transaction.</para>
-        /// </returns>
-        /// <summary>
-        ///     <para>Returns a transaction object. Commands associated with a transaction object are executed as a single transaction. The transaction is terminated with a call to the Commit or Rollback methods.</para>
-        /// </summary>
-        /// <remarks>
-        ///     <para>To associate a command with a transaction object, use the SACommand.Transaction property.</para>
-        /// </remarks>
-        /// <param name="isolationLevel">
-        ///     A member of the SAIsolationLevel enumeration. The default value is ReadCommitted.
-        /// </param>
-        /// <returns>
-        /// <para>An SATransaction object representing the new transaction.</para>
-        /// </returns>
-        /// <example>
-        ///         <code>SATransaction tx = conn.BeginTransaction(
-        /// SAIsolationLevel.ReadUncommitted );</code>
-        /// 
-        ///     </example>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SATransaction" />
-        /// <seealso cref="P:iAnywhere.Data.SQLAnywhere.SACommand.Transaction" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAIsolationLevel" />
         public new SATransaction BeginTransaction(System.Data.IsolationLevel isolationLevel)
         {
-            try
-            {
-                return BeginTransaction(SATransaction.ConvertToSAIsolationLevel(isolationLevel));
-            }
-            finally
-            {
-            }
+            return BeginTransaction(SATransaction.ConvertToSAIsolationLevel(isolationLevel));
         }
 
-        /// <summary>
-        ///     <para>Returns a transaction object. Commands associated with a transaction object are executed as a single transaction. The transaction is terminated with a call to the Commit or Rollback methods.</para>
-        /// </summary>
-        /// <remarks>
-        ///     <para>To associate a command with a transaction object, use the SACommand.Transaction property.</para>
-        /// </remarks>
-        /// <param name="isolationLevel">
-        ///     A member of the SAIsolationLevel enumeration. The default value is ReadCommitted.
-        /// </param>
-        /// <returns>
-        /// <para>An SATransaction object representing the new transaction.</para>
-        /// <para>For more information, see @olink targetdoc="programming" targetptr="transaction-adodotnet-development"@Transaction processing@/olink@.</para>
-        /// <para>For more information, see @olink targetdoc="sqlug" targetptr="typical-isolation-transact"@Typical types of inconsistency@/olink@.</para>
-        /// </returns>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SATransaction" />
-        /// <seealso cref="P:iAnywhere.Data.SQLAnywhere.SACommand.Transaction" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAIsolationLevel" />
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SATransaction.Commit" />
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SATransaction.Rollback" />
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SATransaction.Rollback(System.String)" />
+        protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
+        {
+            return BeginTransaction(isolationLevel);
+        }
+
         public SATransaction BeginTransaction(SAIsolationLevel isolationLevel)
         {
             return _BeginTransaction(isolationLevel);
         }
 
-        private SATransaction _BeginTransaction(SAIsolationLevel isolationLevel)
+        SATransaction _BeginTransaction(SAIsolationLevel isolationLevel)
         {
             if (_state != ConnectionState.Open)
             {
@@ -519,7 +469,7 @@ namespace iAnywhere.Data.SQLAnywhere
         /// </returns>
         protected override DbCommand CreateDbCommand()
         {
-                return CreateCommand();
+            return CreateCommand();
         }
 
         /// <summary>
@@ -535,7 +485,7 @@ namespace iAnywhere.Data.SQLAnywhere
         /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAConnection" />
         public SACommand CreateCommand()
         {
-                return new SACommand("", this, Transaction);
+            return new SACommand("", this, Transaction);
         }
 
         /// <summary>
@@ -545,71 +495,71 @@ namespace iAnywhere.Data.SQLAnywhere
         public override void Open()
         {
             ++SAConnection.s_openCount;
+
+            if (_state == ConnectionState.Open)
+            {
+                throw new InvalidOperationException(SARes.GetString(10985));
+            }
+            if (_connStr == null || _connStr.Trim().Length < 1)
+            {
+                throw new InvalidOperationException(SARes.GetString(10986, "ConnectionString"));
+            }
+
+            object dtcTran = null;
+            _isPooled = SAConnectionOptions.GetPooling(_connOpts);
             try
             {
-                if (_state == ConnectionState.Open)
+                _conn = !_isPooled ? new SAInternalConnection(this, false, dtcTran, _asaConnStr, null) : SAConnection.s_poolManager.AllocateConnection(this, dtcTran, _asaConnStr, _connOpts);
+            }
+            catch (Exception ex)
+            {
+                if (ex is SAException && ((SAException)ex).Errors[0].NativeError == -102)
                 {
-                    throw new InvalidOperationException(SARes.GetString(10985));
-                }
-                if (_connStr == null || _connStr.Trim().Length < 1)
-                {
-                    throw new InvalidOperationException(SARes.GetString(10986, "ConnectionString"));
-                }
-
-                object dtcTran = null;
-                _isPooled = SAConnectionOptions.GetPooling(_connOpts);
-                try
-                {
+                    GC.Collect();
                     _conn = !_isPooled ? new SAInternalConnection(this, false, dtcTran, _asaConnStr, null) : SAConnection.s_poolManager.AllocateConnection(this, dtcTran, _asaConnStr, _connOpts);
                 }
-                catch (Exception ex)
+                else
                 {
-                    if (ex is SAException && ((SAException)ex).Errors[0].NativeError == -102)
-                    {
-                        GC.Collect();
-                        _conn = !_isPooled ? new SAInternalConnection(this, false, dtcTran, _asaConnStr, null) : SAConnection.s_poolManager.AllocateConnection(this, dtcTran, _asaConnStr, _connOpts);
-                    }
-                    else
-                    {
-                        if (!(ex is SAException) || ((SAException)ex).Errors[0].NativeError != -103)
-                            throw ex;
-                    }
+                    if (!(ex is SAException) || ((SAException)ex).Errors[0].NativeError != -103)
+                        throw ex;
                 }
-                _state = ConnectionState.Open;
-                /* TODO: InfoMessage
-                if (InfoMessage != null)
-                {
-                    _msgDelegate = new SAInfoMessageDelegate(this.MessageHandler);
-                    _conn.SetMessageCallback(_msgDelegate);
-                }
-                */
-                SACommand saCommand1 = new SACommand("SELECT CURRENT DATABASE, @@version", this);
-                SADataReader saDataReader = saCommand1.ExecuteReader();
-                saDataReader.Read();
-                string strB = saDataReader[0] as string;
-                _svrVer = saDataReader[1] as string;
-                saDataReader.Close();
-                if (string.Compare("utility_db", strB, true) != 0)
-                {
-                    saCommand1.CommandText = "SET TEMPORARY OPTION QUOTED_IDENTIFIER = ON";
-                    saCommand1.ExecuteNonQuery();
-                }
-                saCommand1.Dispose();
-                string initString = GetInitString();
-                if (initString != null && initString.Length > 0)
-                {
-                    SACommand saCommand2 = new SACommand(initString, this);
-                    saCommand2.ExecuteNonQuery();
-                    saCommand2.Dispose();
-                }
-                if (SAConnectionOptions.GetEnlist(_connOpts))
-                    this._EnlistTransaction(System.Transactions.Transaction.Current);
-                FireStateChange(ConnectionState.Closed, ConnectionState.Open);
             }
-            finally
+            _state = ConnectionState.Open;
+            /* TODO: InfoMessage
+            if (InfoMessage != null)
             {
-                SATrace.FunctionScopeLeave();
+                _msgDelegate = new SAInfoMessageDelegate(this.MessageHandler);
+                _conn.SetMessageCallback(_msgDelegate);
             }
+            */
+            var saCommand1 = new SACommand("SELECT CURRENT DATABASE, @@version", this);
+            string strB;
+            using (var saDataReader = saCommand1.ExecuteReader())
+            {
+                saDataReader.Read();
+                strB = saDataReader[0] as string;
+                _svrVer = saDataReader[1] as string;
+            }
+
+            if (string.Compare("utility_db", strB, true) != 0)
+            {
+                saCommand1.CommandText = "SET TEMPORARY OPTION QUOTED_IDENTIFIER = ON";
+                saCommand1.ExecuteNonQuery();
+            }
+            saCommand1.Dispose();
+            string initString = GetInitString();
+            if (initString != null && initString.Length > 0)
+            {
+                SACommand saCommand2 = new SACommand(initString, this);
+                saCommand2.ExecuteNonQuery();
+                saCommand2.Dispose();
+            }
+            //TODO: Fix _EnlistTransaction
+            //if (SAConnectionOptions.GetEnlist(_connOpts))
+            //    this._EnlistTransaction(System.Transactions.Transaction.Current);
+
+            FireStateChange(ConnectionState.Closed, ConnectionState.Open);
+
         }
 
         private static int GetOpenCount()
@@ -665,9 +615,7 @@ namespace iAnywhere.Data.SQLAnywhere
                         char[] chArray2 = new char[64];
                         for (int index = 0; index < count; ++index)
                         {
-                            fixed (char* keyBuffer = chArray1)
-                              fixed (char* valueBuffer = chArray2)
-                                idEx = PInvokeMethods.AsaConnectionStringParser_GetParameter(idParser, index, keyBuffer, 32, ref keyLength, valueBuffer, 64, ref valueLength);
+                            idEx = PInvokeMethods.AsaConnectionStringParser_GetParameter(idParser, index, chArray1, 32, ref keyLength, chArray2, 64, ref valueLength);
                             if (!SAException.IsException(idEx))
                             {
                                 string str1;
@@ -681,18 +629,16 @@ namespace iAnywhere.Data.SQLAnywhere
                                 {
                                     char[] chArray3 = new char[keyLength];
                                     char[] chArray4 = new char[valueLength];
-                                    fixed (char* keyBuffer = chArray3)
-                                      fixed (char* valueBuffer = chArray4)
+
+                                    idEx = PInvokeMethods.AsaConnectionStringParser_GetParameter(idParser, index, chArray3, keyLength, ref keyLength, chArray4, valueLength, ref valueLength);
+                                    if (!SAException.IsException(idEx))
                                     {
-                                        idEx = PInvokeMethods.AsaConnectionStringParser_GetParameter(idParser, index, keyBuffer, keyLength, ref keyLength, valueBuffer, valueLength, ref valueLength);
-                                        if (!SAException.IsException(idEx))
-                                        {
-                                            str1 = new string(chArray3, 0, keyLength);
-                                            str2 = new string(chArray4, 0, valueLength);
-                                        }
-                                        else
-                                            break;
+                                        str1 = new string(chArray3, 0, keyLength);
+                                        str2 = new string(chArray4, 0, valueLength);
                                     }
+                                    else
+                                        break;
+
                                 }
                                 if (str1.Length > 0 && str2.Length > 0)
                                     removedOptions[str1.Trim().ToLower()] = str2.Trim();

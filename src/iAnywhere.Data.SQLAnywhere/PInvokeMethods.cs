@@ -3,10 +3,10 @@ using System.Runtime.InteropServices;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
-    internal class PInvokeMethods
+    class PInvokeMethods
     {
-        private const string UnmanagedDll = "dbdata11.dll";
-        private const string c_kernelDll = "Kernel32.dll";
+        const string UnmanagedDll = "dbdata11.dll";
+        const string c_kernelDll = "Kernel32.dll";
 
         [DllImport("Kernel32.dll")]
         public static extern IntPtr LocalAlloc(uint uFlags, UIntPtr uBytes);
@@ -27,10 +27,10 @@ namespace iAnywhere.Data.SQLAnywhere
         public static extern int Unmanaged_Fini();
 
         [DllImport("dbdata11.dll")]
-        public static extern unsafe int Unmanaged_FreeMemory(void* buffer);
+        public static extern int Unmanaged_FreeMemory(object[] buffer);
 
         [DllImport("dbdata11.dll")]
-        public static extern unsafe int Asa_GetString(int errorCode, char* buffer, int bufferLength, ref int indicator);
+        public static extern int Asa_GetString(int errorCode, char[] buffer, int bufferLength, ref int indicator);
 
         [DllImport("dbdata11.dll")]
         internal static extern int AsaCommand_Fini(int idCmd);
@@ -84,12 +84,6 @@ namespace iAnywhere.Data.SQLAnywhere
         public static extern int AsaConnection_DtcEnlist(int idConn, bool enlist);
 
         [DllImport("dbdata11.dll")]
-        public static extern unsafe int AsaConnection_SendTransactionCookie(int idConn, byte* cookie, int cookieSize);
-
-        [DllImport("dbdata11.dll")]
-        public static extern unsafe int AsaConnection_GetWhereabouts(int idConn, byte** whereabouts, uint* size);
-
-        [DllImport("dbdata11.dll")]
         public static extern int AsaConnectionStringParser_Init(ref int idParser);
 
         [DllImport("dbdata11.dll")]
@@ -102,7 +96,7 @@ namespace iAnywhere.Data.SQLAnywhere
         public static extern int AsaConnectionStringParser_GetParameterCount(int idParser, ref int count);
 
         [DllImport("dbdata11.dll")]
-        public static extern unsafe int AsaConnectionStringParser_GetParameter(int idParser, int index, char* keyBuffer, int keyBufferLength, ref int keyLength, char* valueBuffer, int valueBufferLength, ref int valueLength);
+        public static extern int AsaConnectionStringParser_GetParameter(int idParser, int index, char[] keyBuffer, int keyBufferLength, ref int keyLength, char[] valueBuffer, int valueBufferLength, ref int valueLength);
 
         [DllImport("dbdata11.dll")]
         public static extern int AsaException_Fini(int idEx);
@@ -111,7 +105,7 @@ namespace iAnywhere.Data.SQLAnywhere
         public static extern int AsaException_GetErrorCount(int idEx, ref int count);
 
         [DllImport("dbdata11.dll")]
-        public static extern unsafe int AsaException_GetErrorInfo(int idEx, int errorIndex, ref int nativeError, char* bufSqlState, int bufLenSqlState, ref int lenSqlState, char* bufMsg, int bufLenMsg, ref int lenMsg);
+        public static extern int AsaException_GetErrorInfo(int idEx, int errorIndex, ref int nativeError, char[] bufSqlState, int bufLenSqlState, ref int lenSqlState, char[] bufMsg, int bufLenMsg, ref int lenMsg);
 
         [DllImport("dbdata11.dll")]
         public static extern int AsaDataReader_Close(int idReader);
@@ -159,16 +153,10 @@ namespace iAnywhere.Data.SQLAnywhere
         public static extern int AsaDataReader_HasRows(int idReader, ref bool hasRows);
 
         [DllImport("dbdata11.dll")]
-        public static extern unsafe int AsaDataReader_ReadBytes(int idReader, int ordinal, long dataIndex, byte* buffer, int bufferIndex, int length, ref int bytesRead, ref long actualSize);
+        public static extern int AsaDataReader_ReadBytes(int idReader, int ordinal, long dataIndex, byte[] buffer, int bufferIndex, int length, ref int bytesRead, ref long actualSize);
 
         [DllImport("dbdata11.dll")]
-        public static extern unsafe int AsaDataReader_ReadChars(int idReader, int ordinal, long dataIndex, char* buffer, int bufferIndex, int length, ref int charsRead, ref long actualSize);
-
-        [DllImport("dbdata11.dll")]
-        public static extern unsafe int AsaDataReader_ReadBytesCE(int idReader, int ordinal, int dataIndex, byte* buffer, int bufferIndex, int length, ref int bytesRead, ref int actualSize);
-
-        [DllImport("dbdata11.dll")]
-        public static extern unsafe int AsaDataReader_ReadCharsCE(int idReader, int ordinal, int dataIndex, char* buffer, int bufferIndex, int length, ref int charsRead, ref int actualSize);
+        public static extern int AsaDataReader_ReadChars(int idReader, int ordinal, long dataIndex, char[] buffer, int bufferIndex, int length, ref int charsRead, ref long actualSize);
 
         [DllImport("dbdata11.dll", CharSet = CharSet.Unicode)]
         public static extern int AsaTransaction_Save(int idTran, string name);

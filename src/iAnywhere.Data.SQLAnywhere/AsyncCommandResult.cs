@@ -67,7 +67,7 @@ namespace iAnywhere.Data.SQLAnywhere
         {
             if (_waitHandle == null)
                 return;
-            _waitHandle.Close();
+            _waitHandle.Dispose();
         }
 
         internal void Complete()
@@ -76,8 +76,8 @@ namespace iAnywhere.Data.SQLAnywhere
             {
                 if (_waitHandle != null)
                     _waitHandle.Set();
-                if (_callback != null)
-                    new Thread(new ThreadStart(this.StartCallback)).Start();
+                //if (_callback != null)
+                //    new Thread(new ThreadStart(this.StartCallback)).Start();
                 _isCompleted = true;
             }
         }

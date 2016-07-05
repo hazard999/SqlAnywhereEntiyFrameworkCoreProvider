@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
@@ -13,12 +14,11 @@ namespace iAnywhere.Data.SQLAnywhere
         public static IntPtr GetUnmanagedString(string str)
         {
             if (str == null)
-                return (IntPtr)0;
-            char* chPtr = (char*)(void*)SAUnmanagedMemory.Alloc((str.Length + 1) * 2);
-            char[] charArray = str.ToCharArray();
-            for (int index = 0; index < charArray.Length; ++index)
-                chPtr[index] = charArray[index];
-            return (IntPtr)((void*)chPtr);
+                return IntPtr.Zero;
+
+            var ptr = Marshal.AllocHGlobal(Marshal.SizeOf(str));
+            Marshal.StructureToPtr(str, ptr, false);
+            return ptr;
         }
 
         public static string EscapeQuotationMarks(char quotationMark, string str)
@@ -36,7 +36,6 @@ namespace iAnywhere.Data.SQLAnywhere
             if (string.IsNullOrEmpty(argVal) || argVal.Trim().Length < 1)
             {
                 Exception e = new ArgumentException(SARes.GetString(25994, argName), argName);
-                SATrace.Exception(e);
                 throw e;
             }
         }
@@ -46,7 +45,6 @@ namespace iAnywhere.Data.SQLAnywhere
             if (argVal == null)
             {
                 ArgumentNullException argumentNullException = new ArgumentNullException(argName);
-                SATrace.Exception(argumentNullException);
                 throw argumentNullException;
             }
         }

@@ -279,7 +279,7 @@ namespace iAnywhere.Data.SQLAnywhere
             _inferType = other._inferType;
         }
 
-        public SAParameter(string parameterName, SADbType dbType, int size, ParameterDirection direction, bool isNullable, byte precision, byte scale, string sourceColumn, DataRowVersion sourceVersion, object value)
+        public SAParameter(string parameterName, SADbType dbType, int size, ParameterDirection direction, bool isNullable, byte precision, byte scale, string sourceColumn, object value)
         {
             Init(parameterName, dbType);
             SetSize(size, "size");
@@ -335,10 +335,10 @@ namespace iAnywhere.Data.SQLAnywhere
         /// </summary>
         public override void ResetDbType()
         {
-                _inferType = true;
-                if (!ShouldInferType())
-                    return;
-                SetTypeFromValue();
+            _inferType = true;
+            if (!ShouldInferType())
+                return;
+            SetTypeFromValue();
         }
 
         private void SetPrecision(byte precision, string parmName)

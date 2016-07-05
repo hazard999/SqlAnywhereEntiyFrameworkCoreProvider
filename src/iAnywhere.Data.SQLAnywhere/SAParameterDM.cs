@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
-    /// <summary>Summary description for SAParameterDM</summary>
-    internal struct SAParameterDM
+    struct SAParameterDM
     {
         public int Ordinal;
         public IntPtr Name;
@@ -24,6 +24,22 @@ namespace iAnywhere.Data.SQLAnywhere
             Precision = precision;
             Scale = scale;
             Value = value;
+        }
+    }
+
+    static class SAParameterDMExtensions
+    {
+        public static IntPtr ToIntPtr(this SAParameterDM[] @params)
+        {
+            if (@params == null)
+                return IntPtr.Zero;
+
+            var ptr = Marshal.AllocHGlobal(Marshal.SizeOf(@params));
+
+            Marshal.StructureToPtr(@params, ptr, true);
+
+            return ptr;
+
         }
     }
 }

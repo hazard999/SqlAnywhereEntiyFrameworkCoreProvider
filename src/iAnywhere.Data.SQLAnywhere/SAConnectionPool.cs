@@ -69,7 +69,7 @@ namespace iAnywhere.Data.SQLAnywhere
       for (int index = 0; index < num; ++index)
       {
         SAInternalConnection connection = new SAInternalConnection(null, true, null, _connStr, connectionGroup);
-        SATrace.AllocateConnection(connectionString);
+        
         connectionGroup.AddConnection(connection);
       }
     }
@@ -123,7 +123,7 @@ namespace iAnywhere.Data.SQLAnywhere
           SAInternalConnection internalConnection = connectionGroup[index];
           if (!internalConnection.Busy && internalConnection.TransactionIsOver)
           {
-            SATrace.ReuseConnection(parent.ConnectionString);
+            
             internalConnection.CheckPooledConnection();
             internalConnection.Busy = true;
             internalConnection.Parent = parent;
@@ -140,7 +140,7 @@ namespace iAnywhere.Data.SQLAnywhere
               SAInternalConnection connection = saConnectionGroup[index2];
               if (!connection.Busy && connection.TransactionIsOver)
               {
-                SATrace.ReuseConnection(parent.ConnectionString);
+                
                 connection.CheckPooledConnection();
                 saConnectionGroup.RemoveConnection(index2);
                 connectionGroup.AddConnection(connection);
@@ -153,16 +153,16 @@ namespace iAnywhere.Data.SQLAnywhere
         }
         if (Count < SAConnectionOptions.GetMaxPoolSize(_connOpts))
         {
-          SATrace.AllocateConnection(parent.ConnectionString);
+          
           SAInternalConnection connection = new SAInternalConnection(parent, true, dtcTran, _connStr, connectionGroup);
           connectionGroup.AddConnection(connection);
           connection.Busy = true;
           return connection;
         }
-        Thread.Sleep(1);
+        //Todo: Fix Thread.Sleep
+        //Thread.Sleep(1);
       }
       Exception e = new InvalidOperationException(SARes.GetString(10988));
-      SATrace.Exception(e);
       throw e;
     }
 
@@ -173,18 +173,15 @@ namespace iAnywhere.Data.SQLAnywhere
       if (connectionLifetime > 0 && connection.LifeTime >= connectionLifetime)
       {
         connection.Close();
-        SATrace.RemoveConnection(connection.ConnectionString);
         connectionGroup.RemoveConnection(connection);
       }
       else if (!connection.Pooled)
       {
         connection.Close();
-        SATrace.RemoveConnection(connection.ConnectionString);
         connectionGroup.RemoveConnection(connection);
       }
       else
       {
-        SATrace.ReturnConnection(connection.ConnectionString);
         connection.ReturnToPool();
       }
       SAConnectionGroup nonTranGroup = NonTranGroup;

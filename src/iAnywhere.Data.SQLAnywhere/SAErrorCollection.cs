@@ -100,7 +100,7 @@ namespace iAnywhere.Data.SQLAnywhere
             return stringBuilder.ToString();
         }
 
-        private static unsafe void GetErrorInfo(int idEx, int errorIndex, ref int nativeError, ref string sqlState, ref string msg)
+        private static void GetErrorInfo(int idEx, int errorIndex, ref int nativeError, ref string sqlState, ref string msg)
         {
             int lenSqlState = 0;
             int bufLenSqlState = 8;
@@ -108,9 +108,8 @@ namespace iAnywhere.Data.SQLAnywhere
             int lenMsg = 0;
             int bufLenMsg = 128;
             char[] chArray2 = new char[bufLenMsg];
-            fixed (char* bufSqlState = chArray1)
-              fixed (char* bufMsg = chArray2)
-                SAErrorCollection.FreeException(PInvokeMethods.AsaException_GetErrorInfo(idEx, errorIndex, ref nativeError, bufSqlState, bufLenSqlState, ref lenSqlState, bufMsg, bufLenMsg, ref lenMsg));
+
+            SAErrorCollection.FreeException(PInvokeMethods.AsaException_GetErrorInfo(idEx, errorIndex, ref nativeError, chArray1, bufLenSqlState, ref lenSqlState, chArray2, bufLenMsg, ref lenMsg));
             bool flag = false;
             if (bufLenSqlState < lenSqlState)
             {
@@ -126,9 +125,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
             if (flag)
             {
-                fixed (char* bufSqlState = chArray1)
-                  fixed (char* bufMsg = chArray2)
-                    SAErrorCollection.FreeException(PInvokeMethods.AsaException_GetErrorInfo(idEx, errorIndex, ref nativeError, bufSqlState, bufLenSqlState, ref lenSqlState, bufMsg, bufLenMsg, ref lenMsg));
+                SAErrorCollection.FreeException(PInvokeMethods.AsaException_GetErrorInfo(idEx, errorIndex, ref nativeError, chArray1, bufLenSqlState, ref lenSqlState, chArray2, bufLenMsg, ref lenMsg));
             }
             sqlState = new string(chArray1, 0, lenSqlState);
             msg = new string(chArray2, 0, lenMsg);

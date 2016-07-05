@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0C44B69A-FD62-4E5A-9614-5D42FC065B2C}"
 EndProject
@@ -15,6 +15,8 @@ EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SqlAnyhwere.EF.Core.Provider.Tests", "src\SqlAnyhwere.EF.Core.Provider.Tests\SqlAnyhwere.EF.Core.Provider.Tests.xproj", "{F4F1CEFE-8991-4624-887F-A1348F2A833C}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "iAnywhere.Data.SQLAnywhere", "src\iAnywhere.Data.SQLAnywhere\iAnywhere.Data.SQLAnywhere.xproj", "{6CEF8AF6-2D17-4E69-94CA-803D7FDB13E9}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TestConsole", "src\TestConsole\TestConsole.xproj", "{8E7059D7-0565-474B-ACAD-1AADA09BCA2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +36,10 @@ Global
 		{6CEF8AF6-2D17-4E69-94CA-803D7FDB13E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6CEF8AF6-2D17-4E69-94CA-803D7FDB13E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6CEF8AF6-2D17-4E69-94CA-803D7FDB13E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E7059D7-0565-474B-ACAD-1AADA09BCA2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E7059D7-0565-474B-ACAD-1AADA09BCA2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E7059D7-0565-474B-ACAD-1AADA09BCA2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E7059D7-0565-474B-ACAD-1AADA09BCA2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -42,5 +48,6 @@ Global
 		{BBB5D1F0-BDF2-4FD4-BE62-420614A15617} = {0C44B69A-FD62-4E5A-9614-5D42FC065B2C}
 		{F4F1CEFE-8991-4624-887F-A1348F2A833C} = {0C44B69A-FD62-4E5A-9614-5D42FC065B2C}
 		{6CEF8AF6-2D17-4E69-94CA-803D7FDB13E9} = {0C44B69A-FD62-4E5A-9614-5D42FC065B2C}
+		{8E7059D7-0565-474B-ACAD-1AADA09BCA2D} = {0C44B69A-FD62-4E5A-9614-5D42FC065B2C}
 	EndGlobalSection
 EndGlobal

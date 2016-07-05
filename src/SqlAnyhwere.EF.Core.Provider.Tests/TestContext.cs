@@ -12,9 +12,7 @@ namespace Provider.Tests
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             options.UseSqlAnywhere(GetConnectionString());
-            options.EnableSensitiveDataLogging();
-           
-            
+            options.EnableSensitiveDataLogging();     
         }
         
         public DbCommand GetDBCommand()

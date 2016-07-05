@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -7,14 +8,10 @@ namespace EntityFrameworkCore.RelationalProviderStarter.Storage
 {
     public class SqlAnywhereDatabaseCreator : RelationalDatabaseCreator
     {
-        public SqlAnywhereDatabaseCreator(IModel model, IRelationalConnection connection, IMigrationsModelDiffer modelDiffer, IMigrationsSqlGenerator migrationsSqlGenerator) : base(model, connection, modelDiffer, migrationsSqlGenerator)
+        public SqlAnywhereDatabaseCreator(IModel model, IRelationalConnection connection, IMigrationsModelDiffer modelDiffer, IMigrationsSqlGenerator migrationsSqlGenerator, IMigrationCommandExecutor migrationCommandExecutor)
+            : base(model, connection, modelDiffer, migrationsSqlGenerator, migrationCommandExecutor)
         {
         }
-
-        //public SqlAnywhereDatabaseCreator(IModel model, IRelationalConnection connection, IMigrationsModelDiffer modelDiffer, IMigrationsSqlGenerator migrationsSqlGenerator, IMigrationCommandExecutor migrationCommandExecutor)
-        //    : base(model, connection, modelDiffer, migrationsSqlGenerator, migrationCommandExecutor)
-        //{
-        //}
 
         public override void Create()
         {

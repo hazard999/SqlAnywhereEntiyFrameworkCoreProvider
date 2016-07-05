@@ -40,15 +40,15 @@ namespace SqlAnywhereProvider.Storage
 
             return string.Empty;
         }
-
-        protected override IReadOnlyDictionary<Type, RelationalTypeMapping> GetSimpleMappings()
+        
+        protected override IReadOnlyDictionary<Type, RelationalTypeMapping> GetClrTypeMappings()
         {
-            return _simpleMappings;
+            throw new NotImplementedException();
         }
 
-        protected override IReadOnlyDictionary<string, RelationalTypeMapping> GetSimpleNameMappings()
+        protected override IReadOnlyDictionary<string, RelationalTypeMapping> GetStoreTypeMappings()
         {
-            return _simpleNameMappings;
+            throw new NotImplementedException();
         }
     }
 }

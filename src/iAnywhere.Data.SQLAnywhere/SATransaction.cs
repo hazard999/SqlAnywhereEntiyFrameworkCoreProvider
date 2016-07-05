@@ -20,7 +20,7 @@ namespace iAnywhere.Data.SQLAnywhere
         private int _idTrans;
         private bool _isValid;
         private static int s_CurrentId;
-        
+
         protected override DbConnection DbConnection
         {
             get
@@ -39,7 +39,6 @@ namespace iAnywhere.Data.SQLAnywhere
         {
             get
             {
-                SATrace.PropertyCall("<sa.SATransaction.get_Connection|API>", _objectId);
                 return _conn;
             }
         }
@@ -77,7 +76,6 @@ namespace iAnywhere.Data.SQLAnywhere
         {
             get
             {
-                SATrace.PropertyCall("<sa.SATransaction.get_IsolationLevel|API>", _objectId);
                 return SATransaction.ConvertToIsolationLevel(_il);
             }
         }
@@ -124,7 +122,6 @@ namespace iAnywhere.Data.SQLAnywhere
         {
             get
             {
-                SATrace.PropertyCall("<sa.SATransaction.get_SAIsolationLevel|API>", _objectId);
                 return _il;
             }
         }
@@ -133,7 +130,6 @@ namespace iAnywhere.Data.SQLAnywhere
         {
             get
             {
-                SATrace.PropertyCall("<sa.SATransaction.get_IsValid|API>", _objectId);
                 return _isValid;
             }
         }
@@ -181,7 +177,6 @@ namespace iAnywhere.Data.SQLAnywhere
             if (_internalConn == null)
             {
                 Exception e = new InvalidOperationException(SARes.GetString(10999));
-                SATrace.Exception(e);
                 throw e;
             }
         }
@@ -191,7 +186,6 @@ namespace iAnywhere.Data.SQLAnywhere
             if (savePoint == null || savePoint.Trim().Length < 1)
             {
                 Exception e = new ArgumentException(SARes.GetString(11000), "savePoint");
-                SATrace.Exception(e);
                 throw e;
             }
         }
@@ -201,17 +195,9 @@ namespace iAnywhere.Data.SQLAnywhere
         /// </summary>
         public override void Commit()
         {
-            try
-            {
-                SATrace.FunctionScopeEnter("<sa.SATransaction.Commit|API>", _objectId, new string[0]);
-                CheckConnection();
-                SAException.CheckException(PInvokeMethods.AsaTransaction_Commit(_idTrans));
-                Fini();
-            }
-            finally
-            {
-                SATrace.FunctionScopeLeave();
-            }
+            CheckConnection();
+            SAException.CheckException(PInvokeMethods.AsaTransaction_Commit(_idTrans));
+            Fini();
         }
 
         /// <summary>
@@ -222,17 +208,9 @@ namespace iAnywhere.Data.SQLAnywhere
         /// </remarks>
         public override void Rollback()
         {
-            try
-            {
-                SATrace.FunctionScopeEnter("<sa.SATransaction.Rollback|API>", _objectId, new string[0]);
-                CheckConnection();
-                SAException.CheckException(PInvokeMethods.AsaTransaction_Rollback(_idTrans));
-                Fini();
-            }
-            finally
-            {
-                SATrace.FunctionScopeLeave();
-            }
+            CheckConnection();
+            SAException.CheckException(PInvokeMethods.AsaTransaction_Rollback(_idTrans));
+            Fini();
         }
 
         /// <summary>
@@ -244,17 +222,9 @@ namespace iAnywhere.Data.SQLAnywhere
         /// <param name="savePoint">The name of the savepoint to roll back to.</param>
         public void Rollback(string savePoint)
         {
-            try
-            {
-                SATrace.FunctionScopeEnter("<sa.SATransaction.Rollback|API>", _objectId, "savePoint");
-                CheckConnection();
-                CheckSavePoint(savePoint);
-                SAException.CheckException(PInvokeMethods.AsaTransaction_RollbackToName(_idTrans, savePoint));
-            }
-            finally
-            {
-                SATrace.FunctionScopeLeave();
-            }
+            CheckConnection();
+            CheckSavePoint(savePoint);
+            SAException.CheckException(PInvokeMethods.AsaTransaction_RollbackToName(_idTrans, savePoint));
         }
 
         /// <summary>
@@ -265,17 +235,9 @@ namespace iAnywhere.Data.SQLAnywhere
         /// </param>
         public void Save(string savePoint)
         {
-            try
-            {
-                SATrace.FunctionScopeEnter("<sa.SATransaction.Save|API>", _objectId, "savePoint");
-                CheckConnection();
-                CheckSavePoint(savePoint);
-                SAException.CheckException(PInvokeMethods.AsaTransaction_Save(_idTrans, savePoint));
-            }
-            finally
-            {
-                SATrace.FunctionScopeLeave();
-            }
+            CheckConnection();
+            CheckSavePoint(savePoint);
+            SAException.CheckException(PInvokeMethods.AsaTransaction_Save(_idTrans, savePoint));
         }
 
         internal static SAIsolationLevel ConvertToSAIsolationLevel(IsolationLevel isoLevel)
