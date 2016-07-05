@@ -26,11 +26,10 @@ namespace TestConsole
             return fac.ToString();
         }
 
-
         public static void Main(string[] args)
         {
             var cmd = GetDBCommand();
-            cmd.CommandText = "SELECT * FROM KANZLEI";
+            cmd.CommandText = "SELECT * FROM KG_PG";
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
