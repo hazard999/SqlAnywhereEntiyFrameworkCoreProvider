@@ -1,41 +1,38 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
     public sealed class SACommand : DbCommand
     {
-        private string[] _allParmNames = new string[0];
-        private string[] _inParmNames = new string[0];
-        private string[] _outParmNames = new string[0];
-        private bool _getOutputParms = true;
-        private int _objectId = s_CurrentId++;
-        private int _timeout;
-        private bool _designTimeVisible;
-        private string _cmdText;
-        private SAConnection _conn;
-        private SATransaction _asaTran;
-        private SAParameterCollection _parms;
-        private SAParameterCollection _parmsOld;
-        private bool _namedParms;
-        private CommandType _cmdType;
-        private UpdateRowSource _updatedRowSrc;
-        private bool _isExecuting;
-        private bool _isPrepared;
-        private int _idCmd;
-        private string _exeMethodName;
-        private int _recordsAffected;
-        private bool _disposed;
-        private WeakReference _wrReader;
-        private SACommand.AsyncCommandCallback _asyncCallback;
-        private AsyncCommandResult _currentAsyncResult;
-        private AutoResetEvent _asyncController;
-        private static int s_CurrentId;
+        string[] _allParmNames = new string[0];
+        string[] _inParmNames = new string[0];
+        string[] _outParmNames = new string[0];
+        bool _getOutputParms = true;
+        int _objectId = s_CurrentId++;
+        int _timeout;
+        bool _designTimeVisible;
+        string _cmdText;
+        SAConnection _conn;
+        SATransaction _asaTran;
+        SAParameterCollection _parms;
+        SAParameterCollection _parmsOld;
+        bool _namedParms;
+        CommandType _cmdType;
+        UpdateRowSource _updatedRowSrc;
+        bool _isExecuting;
+        bool _isPrepared;
+        int _idCmd;
+        string _exeMethodName;
+        int _recordsAffected;
+        bool _disposed;
+        WeakReference _wrReader;
+        static int s_CurrentId;
 
         internal int RecordsAffected
         {
@@ -56,8 +53,10 @@ namespace iAnywhere.Data.SQLAnywhere
                 if (!_cmdText.Equals(value))
                     Unprepare();
                 _cmdText = value == null ? "" : value;
-                if (!SACommand.IsCreateTableStmt(_cmdText))
+
+                if (!IsCreateTableStmt(_cmdText))
                     return;
+
                 _cmdText = ModifyCreateTableStmt(_cmdText);
             }
         }
@@ -71,10 +70,8 @@ namespace iAnywhere.Data.SQLAnywhere
             set
             {
                 if (value < 0)
-                {
-                    Exception e = new ArgumentException(SARes.GetString(10995, value.ToString()), "value");
-                    throw e;
-                }
+                    throw new ArgumentException(SARes.GetString(10995, value.ToString()), nameof(value));
+
                 _timeout = value;
             }
         }
@@ -88,10 +85,9 @@ namespace iAnywhere.Data.SQLAnywhere
             set
             {
                 if (value == CommandType.TableDirect)
-                {
-                    Exception e = new ArgumentException(SARes.GetString(10996), "value");
-                    throw e;
-                }
+                    throw new ArgumentException(SARes.GetString(10996), nameof(value));
+
+
                 if (_cmdType != value)
                     Unprepare();
                 _cmdType = value;
@@ -109,18 +105,6 @@ namespace iAnywhere.Data.SQLAnywhere
                 if (_conn != value)
                     Unprepare();
                 _conn = (SAConnection)value;
-            }
-        }
-
-        public SAConnection Connection
-        {
-            get
-            {
-                return (SAConnection)DbConnection;
-            }
-            set
-            {
-                DbConnection = value;
             }
         }
 
@@ -144,14 +128,6 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        public SAParameterCollection Parameters
-        {
-            get
-            {
-                return (SAParameterCollection)DbParameterCollection;
-            }
-        }
-
         protected override DbTransaction DbTransaction
         {
             get
@@ -164,17 +140,6 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        public SATransaction Transaction
-        {
-            get
-            {
-                return (SATransaction)DbTransaction;
-            }
-            set
-            {
-                DbTransaction = value;
-            }
-        }
 
         public override UpdateRowSource UpdatedRowSource
         {
@@ -244,13 +209,11 @@ namespace iAnywhere.Data.SQLAnywhere
 
         protected override void Dispose(bool disposing)
         {
-            ResetAsyncCommand();
             if (_disposed)
                 return;
+
             try
             {
-                if (_asyncController != null)
-                    _asyncController.Dispose();
                 if (disposing)
                 {
                     FreeCommand(true);
@@ -268,11 +231,14 @@ namespace iAnywhere.Data.SQLAnywhere
         {
             if (!SAUtility.IsValidId(_idCmd))
                 return;
+
             int idEx = PInvokeMethods.AsaCommand_Fini(_idCmd);
+
             if (checkException)
                 SAException.CheckException(idEx);
             else
                 SAException.FreeException(idEx);
+
             _idCmd = 0;
         }
 
@@ -323,124 +289,32 @@ namespace iAnywhere.Data.SQLAnywhere
             return new SAParameter();
         }
 
-        public SAParameter CreateParameter()
-        {
-            return (SAParameter)CreateDbParameter();
-        }
-
         protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
         {
-            return _ExecuteReader(behavior, false, false);
-        }
-
-        public SADataReader ExecuteReader()
-        {
-            return _ExecuteReader(CommandBehavior.Default, false, false);
-        }
-
-        public SADataReader ExecuteReader(CommandBehavior behavior)
-        {
-            return (SADataReader)ExecuteDbDataReader(behavior);
-        }
-
-        public IAsyncResult BeginExecuteReader()
-        {
-            return BeginExecuteReader(null, null, CommandBehavior.Default);
-        }
-
-        public IAsyncResult BeginExecuteReader(CommandBehavior behavior)
-        {
-            return BeginExecuteReader(null, null, behavior);
-        }
-
-        public IAsyncResult BeginExecuteReader(AsyncCallback callback, object stateObject)
-        {
-            return BeginExecuteReader(callback, stateObject, CommandBehavior.Default);
-        }
-
-        public IAsyncResult BeginExecuteReader(AsyncCallback callback, object stateObject, CommandBehavior behavior)
-        {
-            CheckAsyncNotExecuting();
-            CheckNoExistingAsyncCmd();
-            if (_asyncController == null)
-                _asyncController = new AutoResetEvent(false);
-            _currentAsyncResult = new AsyncCommandResult(callback, stateObject, AsyncCommandType.ExecuteReader);
-            _conn.AsyncCommand = this;
-            try
-            {
-                _ExecuteReader(behavior, false, true);
-            }
-            catch (Exception ex)
-            {
-                ResetAsyncCommand();
-                throw;
-            }
-            return _currentAsyncResult;
-        }
-
-        public SADataReader EndExecuteReader(IAsyncResult asyncResult)
-        {
-            try
-            {
-                CheckAsyncResult(asyncResult, AsyncCommandType.ExecuteReader);
-                _asyncController.WaitOne();
-                int outputParmValueCount = 0;
-                IntPtr outputParmValues = IntPtr.Zero;
-                int idReader = 0;
-                int rowCount = -1;
-                try
-                {
-                    int idEx = PInvokeMethods.AsaCommand_EndExecuteReader(_conn.InternalConnection.ConnectionId, ref outputParmValueCount, ref outputParmValues, ref idReader, ref rowCount);
-                    if (SAException.IsException(idEx))
-                    {
-                        SAException instance = SAException.CreateInstance(idEx);
-                        throw instance;
-                    }
-                    if (!_isExecuting)
-                        return null;
-                    GetParameterValues(outputParmValueCount, outputParmValues);
-                    return new SADataReader(_conn, _currentAsyncResult.Behavior, idReader, _recordsAffected, this);
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(_currentAsyncResult.ParmsDM);
-
-                    //_parms.FreeParameterInfo(_currentAsyncResult.ParmCount, (SAParameterDM*).ToPointer());
-                    FreeCommand(true);
-                    _isExecuting = false;
-                    _currentAsyncResult = null;
-                }
-            }
-            finally
-            {
-                ResetAsyncCommand();
-            }
-        }
-
-        void ResetAsyncCommand()
-        {
-            if (_conn == null || _conn.AsyncCommand != this)
-                return;
-            _conn.AsyncCommand = null;
+            return _ExecuteReader(behavior, false);
         }
 
         public override void Prepare()
         {
             _exeMethodName = "Prepare";
-            CheckAlreadyExecuting();
-            CheckExistingDataReader();
-            Validate();
-            _Prepare();
-            _isExecuting = false;
+            try
+            {
+                CheckAlreadyExecuting();
+                CheckExistingDataReader();
+                Validate();
+                _Prepare();
+            }
+            finally
+            {
+                _isExecuting = false;
+            }
         }
 
-        private void _Prepare()
+        void _Prepare()
         {
             int count = 0;
             string sqlCommand = GetSQLCommand();
-            char[] arParmNames1 = new char[2048];
-            char[] arParmNames2 = new char[2048];
-            char[] arParmNames3 = new char[2048];
+
             SAParameterDM[] pParmsDM = null;
             try
             {
@@ -448,14 +322,34 @@ namespace iAnywhere.Data.SQLAnywhere
                 FreeCommand(true);
                 _parms.GetParameterInfo(out count, ref pParmsDM, false, false, null);
 
-                SAException.CheckException(PInvokeMethods.AsaCommand_Prepare(ref _idCmd, _conn.InternalConnection.ConnectionId, sqlCommand, count, pParmsDM.ToIntPtr(), ref _namedParms, arParmNames1.ToIntPr(), arParmNames2.ToIntPr(), arParmNames3.ToIntPr()));
+                var paramsPtr = pParmsDM.ToIntPtr();
+                var allParamsPtr = Marshal.AllocHGlobal(2048);
+                var inParamsPtr = Marshal.AllocHGlobal(2048);
+                var outParamsPtr = Marshal.AllocHGlobal(2048);
+
+                SAException.CheckException(
+                    PInvokeMethods.AsaCommand_Prepare(
+                        ref _idCmd,
+                        _conn.InternalConnection.ConnectionId,
+                        sqlCommand,
+                        count,
+                        paramsPtr,
+                        ref _namedParms,
+                         allParamsPtr,
+                         inParamsPtr,
+                         outParamsPtr));
 
                 if (_namedParms)
                 {
-                    _allParmNames = GetParameterNames(arParmNames1);
-                    _inParmNames = GetParameterNames(arParmNames2);
-                    _outParmNames = GetParameterNames(arParmNames3);
+                    _allParmNames = GetParameterNames(allParamsPtr);
+                    _inParmNames = GetParameterNames(inParamsPtr);
+                    _outParmNames = GetParameterNames(outParamsPtr);
                 }
+
+                Marshal.FreeHGlobal(allParamsPtr);
+                Marshal.FreeHGlobal(inParamsPtr);
+                Marshal.FreeHGlobal(outParamsPtr);
+
                 SaveParameters();
                 _isPrepared = true;
             }
@@ -466,7 +360,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
             finally
             {
-                _parms.FreeParameterInfo(count, pParmsDM);
+                _parms.FreeParameterInfo(pParmsDM);
             }
         }
 
@@ -480,112 +374,98 @@ namespace iAnywhere.Data.SQLAnywhere
             _isPrepared = false;
         }
 
-        string[] GetParameterNames(char[] arParmNames)
+        string[] GetParameterNames(IntPtr arParmNames)
         {
-            string str1 = new string(arParmNames);
+            string str1 = Marshal.PtrToStringUni(arParmNames);
             string str2 = str1.Substring(0, str1.IndexOf(char.MinValue));
             if (str2.Length <= 0)
                 return new string[0];
             return str2.Split('\t');
         }
 
-        private SADataReader _ExecuteReader(CommandBehavior commandBehavior, bool isExecuteScalar, bool isBeginExecuteReader)
+        SADataReader _ExecuteReader(CommandBehavior commandBehavior, bool isExecuteScalar)
         {
             int idEx = 0;
             int idReader = 0;
-            int count1 = 0;
-            SAParameterDM[] pParmsDM = null;
             int count2 = 0;
             SAValue[] pValues = null;
             int outputParmCount = 0;
             IntPtr outputParmValues = IntPtr.Zero;
-            _exeMethodName = !isBeginExecuteReader ? (!isExecuteScalar ? "ExecuteReader" : "ExecuteScalar") : "BeginExecuteReader";
+            _exeMethodName = !isExecuteScalar ? "ExecuteReader" : "ExecuteScalar";
+
             CheckAlreadyExecuting();
             CheckExistingDataReader();
             Validate();
             VerifyParameterType();
+
             try
             {
-                if (isBeginExecuteReader)
-                {
-                    _parms.GetParameterInfo(out count1, ref pParmsDM, true, _namedParms, _allParmNames);
-                    _currentAsyncResult.ParmCount = count1;
-                    var intprt = new IntPtr();
-                    Marshal.StructureToPtr(pParmsDM, intprt, true);
-                    _currentAsyncResult.ParmsDM = intprt;
-                    _currentAsyncResult.Behavior = commandBehavior;
-                    Unprepare();
-                    idEx = PInvokeMethods.AsaCommand_BeginExecuteReaderDirect(ref _idCmd, _conn.InternalConnection.ConnectionId, GetSQLCommand(), count1, pParmsDM.ToIntPtr(), Marshal.GetFunctionPointerForDelegate(_asyncCallback));
-                }
-                else
-                {
-                    if (!_isPrepared || ParameterChanged())
-                        _Prepare();
-                    _parms.GetInputParameterValues(out count2, ref pValues, _allParmNames, _inParmNames, _namedParms);
-                    bool flag = true;
-                    while (flag)
-                    {
+                if (!_isPrepared || ParameterChanged())
+                    _Prepare();
 
-                        idEx = PInvokeMethods.AsaCommand_ExecuteReader(_idCmd, count2, pValues.ToIntPtr(), ref outputParmCount, ref outputParmValues, ref idReader, ref _recordsAffected);
-                        if (idEx == -1)
-                            _Prepare();
-                        else
-                            flag = false;
-                    }
-                }
-                if (SAException.IsException(idEx))
+                _parms.GetInputParameterValues(out count2, ref pValues, _allParmNames, _inParmNames, _namedParms);
+                bool flag = true;
+                while (flag)
                 {
-                    SAException instance = SAException.CreateInstance(idEx);
-                    throw instance;
+
+                    idEx = PInvokeMethods.AsaCommand_ExecuteReader(_idCmd, count2, pValues.ToIntPtr(), ref outputParmCount, ref outputParmValues, ref idReader, ref _recordsAffected);
+                    if (idEx == -1)
+                        _Prepare();
+                    else
+                        flag = false;
                 }
-                if (!_isExecuting || isBeginExecuteReader)
+
+                if (SAException.IsException(idEx))
+                    throw SAException.CreateInstance(idEx);
+
+                if (!_isExecuting)
                     return null;
+
                 GetParameterValues(outputParmCount, outputParmValues);
+
                 if (!SAUtility.IsValidId(idReader))
                     return null;
+
                 SADataReader saDataReader = new SADataReader(_conn, commandBehavior, idReader, _recordsAffected, this);
                 _wrReader = new WeakReference(saDataReader);
-                
+
                 return saDataReader;
             }
-            catch (Exception ex)
+            catch
             {
-                if (isBeginExecuteReader)
-                    _parms.FreeParameterInfo(count1, pParmsDM);
                 _isPrepared = false;
                 FreeCommand(false);
-                throw ex;
+                throw;
             }
             finally
             {
-                if (!isBeginExecuteReader)
-                {
-                    _parms.FreeParameterValues(count2, pValues);
-                    _isExecuting = false;
-                }
+                _parms.FreeParameterValues(count2, pValues);
+                _isExecuting = false;
             }
         }
 
-        private void SaveParameters()
+        void SaveParameters()
         {
             _parmsOld.Clear();
-            foreach (SAParameter parm in (DbParameterCollection)_parms)
+            foreach (var parm in _parms.OfType<SAParameter>())
             {
-                SAParameter saParameter = new SAParameter(parm.ParameterName, parm.SADbType, parm.Size, parm.Direction, parm.IsNullable, parm.Precision, parm.Scale, parm.SourceColumn, null);
+                var saParameter = new SAParameter(parm.ParameterName, parm.SADbType, parm.Size, parm.Direction, parm.IsNullable, parm.Precision, parm.Scale, parm.SourceColumn, null);
                 saParameter.Size = parm.Size;
                 _parmsOld.Add(saParameter);
             }
         }
 
-        private bool ParameterChanged()
+        bool ParameterChanged()
         {
             if (_parms.Count != _parmsOld.Count)
                 return true;
+
             for (int index = 0; index < _parms.Count; ++index)
             {
                 if (_parms[index].Direction != _parmsOld[index].Direction || _parms[index].IsNullable != _parmsOld[index].IsNullable || (_parms[index].Size != _parmsOld[index].Size || _parms[index].Precision != _parmsOld[index].Precision) || _parms[index].Scale != _parmsOld[index].Scale)
                     return true;
             }
+
             return false;
         }
 
@@ -596,173 +476,78 @@ namespace iAnywhere.Data.SQLAnywhere
             SAValue[] pValues = null;
             int outputParmCount = 0;
             IntPtr outputParmValues = IntPtr.Zero;
-            bool flag1 = _currentAsyncResult != null;
-            int count2 = 0;
-            SAParameterDM[] pParmsDM = null;
-            _exeMethodName = !flag1 ? "ExecuteNonQuery" : "BeginExecuteNonQuery";
+            _exeMethodName = "ExecuteNonQuery";
+
             CheckAlreadyExecuting();
             CheckExistingDataReader();
             Validate();
             VerifyParameterType();
+
             try
             {
-                if (flag1)
+                if (!_isPrepared || ParameterChanged())
+                    _Prepare();
+                _parms.GetInputParameterValues(out count1, ref pValues, _allParmNames, _inParmNames, _namedParms);
+                bool flag2 = true;
+                while (flag2)
                 {
-                    _parms.GetParameterInfo(out count2, ref pParmsDM, true, _namedParms, _allParmNames);
-                    _currentAsyncResult.ParmCount = count2;
-                    _currentAsyncResult.ParmsDM = pParmsDM.ToIntPtr();
-
-                    Unprepare();
-                    idEx = PInvokeMethods.AsaCommand_BeginExecuteNonQueryDirect(ref _idCmd, _conn.InternalConnection.ConnectionId, GetSQLCommand(), count2, pParmsDM.ToIntPtr(), Marshal.GetFunctionPointerForDelegate(_asyncCallback));
-                }
-                else
-                {
-                    if (!_isPrepared || ParameterChanged())
+                    idEx = PInvokeMethods.AsaCommand_ExecuteNonQuery(_idCmd, count1, pValues.ToIntPtr(), ref outputParmCount, ref outputParmValues, ref _recordsAffected);
+                    if (idEx == -1)
                         _Prepare();
-                    _parms.GetInputParameterValues(out count1, ref pValues, _allParmNames, _inParmNames, _namedParms);
-                    bool flag2 = true;
-                    while (flag2)
-                    {
-                        idEx = PInvokeMethods.AsaCommand_ExecuteNonQuery(_idCmd, count1, pValues.ToIntPtr(), ref outputParmCount, ref outputParmValues, ref _recordsAffected);
-                        if (idEx == -1)
-                            _Prepare();
-                        else
-                            flag2 = false;
-                    }
+                    else
+                        flag2 = false;
                 }
+
                 if (SAException.IsException(idEx))
                 {
                     SAException instance = SAException.CreateInstance(idEx);
                     throw instance;
                 }
-                if (!_isExecuting || flag1)
+                if (!_isExecuting)
                     return -1;
                 GetParameterValues(outputParmCount, outputParmValues);
             }
-            catch (Exception ex)
+            catch
             {
-                if (flag1)
-                    _parms.FreeParameterInfo(count2, pParmsDM);
+
                 _isPrepared = false;
                 FreeCommand(false);
-                throw ex;
-            }
-            finally
-            {
-                if (!flag1)
-                {
-                    _parms.FreeParameterValues(count1, pValues);
-                    _isExecuting = false;
-                }
-            }
-            return _recordsAffected;
-
-        }
-
-        public IAsyncResult BeginExecuteNonQuery()
-        {
-            return BeginExecuteNonQuery(null, null);
-        }
-
-        public IAsyncResult BeginExecuteNonQuery(AsyncCallback callback, object stateObject)
-        {
-            CheckAsyncNotExecuting();
-            CheckNoExistingAsyncCmd();
-            if (_asyncController == null)
-                _asyncController = new AutoResetEvent(false);
-            _currentAsyncResult = new AsyncCommandResult(callback, stateObject, AsyncCommandType.ExecuteNonQuery);
-            _conn.AsyncCommand = this;
-            try
-            {
-                ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                ResetAsyncCommand();
                 throw;
             }
-            return _currentAsyncResult;
-        }
-
-        public int EndExecuteNonQuery(IAsyncResult asyncResult)
-        {
-            try
-            {
-                AsyncCommandResult asyncCommandResult = (AsyncCommandResult)asyncResult;
-                CheckAsyncResult(asyncCommandResult, AsyncCommandType.ExecuteNonQuery);
-                _asyncController.WaitOne();
-                int outputParmCount = 0;
-                IntPtr outputParmValues = IntPtr.Zero;
-                _exeMethodName = "EndExecuteNonQuery";
-                Validate();
-                try
-                {
-                    int idEx = PInvokeMethods.AsaCommand_EndExecuteNonQuery(_conn.InternalConnection.ConnectionId, ref outputParmCount, ref outputParmValues, ref _recordsAffected);
-                    if (SAException.IsException(idEx))
-                    {
-                        SAException instance = SAException.CreateInstance(idEx);
-                        throw instance;
-                    }
-                    if (!_isExecuting)
-                        return -1;
-                    GetParameterValues(outputParmCount, outputParmValues);
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-                finally
-                {
-                    //_parms.FreeParameterValues(asyncCommandResult.InputParmCount, (SAValue*)asyncCommandResult.InputParmValues.ToPointer());
-                    //_parms.FreeParameterInfo(asyncCommandResult.ParmCount, (SAParameterDM*)asyncCommandResult.ParmsDM.ToPointer());
-                    _isExecuting = false;
-                    _currentAsyncResult = null;
-                }
-                return _recordsAffected;
-            }
             finally
             {
-                ResetAsyncCommand();
+                _parms.FreeParameterValues(count1, pValues);
+                _isExecuting = false;
             }
+
+            return _recordsAffected;
         }
 
         public override object ExecuteScalar()
         {
-            try
+            var saDataReader = _ExecuteReader(CommandBehavior.Default, true);
+
+            if (saDataReader != null)
             {
-                object obj = null;
-                SADataReader saDataReader = _ExecuteReader(CommandBehavior.Default, true, false);
-                if (saDataReader != null)
-                {
-                    if (saDataReader.Read())
-                        obj = saDataReader.GetValue(0);
-                }
-                return obj;
+                if (saDataReader.Read())
+                    return saDataReader.GetValue(0);
             }
-            finally
-            {
-            }
+
+            return null;
         }
 
         public override void Cancel()
         {
-            try
+            if (_isExecuting)
             {
-                if (_isExecuting)
-                {
-                    _isExecuting = false;
-                    if (_idCmd < 0)
-                        return;
-                    SAException.CheckException(PInvokeMethods.AsaCommand_Cancel(_idCmd));
-                }                
-            }
-            finally
-            {
-                ResetAsyncCommand();
+                _isExecuting = false;
+                if (_idCmd < 0)
+                    return;
+                SAException.CheckException(PInvokeMethods.AsaCommand_Cancel(_idCmd));
             }
         }
 
-        private string GetSQLCommand()
+        string GetSQLCommand()
         {
             string str = null;
             if (_cmdType == CommandType.Text)
@@ -807,64 +592,40 @@ namespace iAnywhere.Data.SQLAnywhere
             return str;
         }
 
-        private void CheckAlreadyExecuting()
+        void CheckAlreadyExecuting()
         {
             if (_isExecuting)
-            {
-                Exception e = new InvalidOperationException(SARes.GetString(10994));
-                throw e;
-            }
+                throw new InvalidOperationException(SARes.GetString(10994));
+
             _isExecuting = true;
         }
 
-        private void Validate()
+        void Validate()
         {
-            Exception e = null;
             if (_conn == null)
+                throw new InvalidOperationException(SARes.GetString(10986, "Connection"));
+
+            if (_conn.GetConnectionState() != ConnectionState.Open)
+                throw new InvalidOperationException(SARes.GetString(10993, _exeMethodName));
+
+            if (_asaTran == null || !_asaTran.IsValid)
             {
-                e = new InvalidOperationException(SARes.GetString(10986, "Connection"));
+                if (_conn.Transaction != null)
+                    throw new InvalidOperationException(SARes.GetString(11001));
             }
-            else if (_conn.GetConnectionState() != ConnectionState.Open)
+            else if (_conn != _asaTran.Connection)
             {
-                e = new InvalidOperationException(SARes.GetString(10993, _exeMethodName));
+                throw new InvalidOperationException(SARes.GetString(10992));
             }
-            else
+
+            if (_cmdText == null || _cmdText.Trim().Length < 1)
+                throw new InvalidOperationException(SARes.GetString(10986, _exeMethodName + ": CommandText"));
+
+            for (var index = 0; index < Parameters.Count; ++index)
             {
-                if (_asaTran == null || !_asaTran.IsValid)
-                {
-                    if (_conn.Transaction != null)
-                    {
-                        e = new InvalidOperationException(SARes.GetString(11001));
-                        goto label_16;
-                    }
-                }
-                else if (_conn != _asaTran.Connection)
-                {
-                    e = new InvalidOperationException(SARes.GetString(10992));
-                    goto label_16;
-                }
-                if (_cmdText == null || _cmdText.Trim().Length < 1)
-                {
-                    e = new InvalidOperationException(SARes.GetString(10986, _exeMethodName + ": CommandText"));
-                }
-                else
-                {
-                    for (int index = 0; index < Parameters.Count; ++index)
-                    {
-                        SAParameter saParameter = Parameters[index];
-                        if (saParameter.Size == 0 && (saParameter.Direction == ParameterDirection.Output || saParameter.Direction == ParameterDirection.InputOutput) && (saParameter.DbType == DbType.AnsiString || saParameter.DbType == DbType.AnsiStringFixedLength || (saParameter.DbType == DbType.String || saParameter.DbType == DbType.StringFixedLength) || (saParameter.DbType == DbType.Binary || saParameter.DbType == DbType.Xml)))
-                        {
-                            e = new InvalidOperationException(SARes.GetString(17421, index.ToString()));
-                            break;
-                        }
-                    }
-                }
-            }
-            label_16:
-            if (e != null)
-            {
-                _isExecuting = false;
-                throw e;
+                var saParameter = (SAParameter)Parameters[index];
+                if (saParameter.Size == 0 && (saParameter.Direction == ParameterDirection.Output || saParameter.Direction == ParameterDirection.InputOutput) && (saParameter.DbType == DbType.AnsiString || saParameter.DbType == DbType.AnsiStringFixedLength || (saParameter.DbType == DbType.String || saParameter.DbType == DbType.StringFixedLength) || (saParameter.DbType == DbType.Binary || saParameter.DbType == DbType.Xml)))
+                    throw new InvalidOperationException(SARes.GetString(17421, index.ToString()));
             }
         }
 
@@ -926,15 +687,14 @@ namespace iAnywhere.Data.SQLAnywhere
             SAException.CheckException(PInvokeMethods.AsaCommand_FreeOutputParameterValues(count, pValues));
         }
 
-        private void Init()
+        void Init()
         {
             Fini();
             _parms = new SAParameterCollection();
             _parmsOld = new SAParameterCollection();
-            _asyncCallback = new SACommand.AsyncCommandCallback(AsyncCallBack);
         }
 
-        private void Fini()
+        void Fini()
         {
             _timeout = 30;
             _designTimeVisible = true;
@@ -947,54 +707,7 @@ namespace iAnywhere.Data.SQLAnywhere
             _idCmd = 0;
             _parms = null;
             _parmsOld = null;
-            _asyncCallback = null;
         }
-
-        private void AsyncCallBack()
-        {
-            _currentAsyncResult.Complete();
-            _asyncController.Set();
-        }
-
-        private void CheckNoExistingAsyncCmd()
-        {
-            if (_conn.AsyncCommand != null)
-            {
-                Exception e = new InvalidOperationException(SARes.GetString(18531));
-                throw e;
-            }
-        }
-
-        private void CheckAsyncNotExecuting()
-        {
-            if (_currentAsyncResult != null)
-            {
-                Exception e = new InvalidOperationException(SARes.GetString(14973));
-                throw e;
-            }
-        }
-
-        private void CheckAsyncResult(IAsyncResult asyncResult, AsyncCommandType type)
-        {
-            if (asyncResult == null)
-            {
-                Exception e = new ArgumentNullException("asyncResult");
-                throw e;
-            }
-            if (_currentAsyncResult == null)
-            {
-                Exception e = new InvalidOperationException(SARes.GetString(14974));
-                throw e;
-            }
-            if (_currentAsyncResult != asyncResult)
-            {
-                Exception e = new ArgumentException(SARes.GetString(14975), "asyncResult");
-                throw e;
-            }
-            _currentAsyncResult.CheckCommandType(type);
-        }
-
-        private delegate void AsyncCommandCallback();
     }
 
     static class CharExtensions

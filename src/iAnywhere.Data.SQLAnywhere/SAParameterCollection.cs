@@ -4,15 +4,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
     public sealed class SAParameterCollection : DbParameterCollection
     {
-        private int _objectId = SAParameterCollection.s_CurrentId++;
-        private List<SAParameter> _parms;
-        private static int s_CurrentId;
+        int _objectId = s_CurrentId++;
+        List<SAParameter> _parms;
+        static int s_CurrentId;
 
         public override int Count
         {
@@ -22,7 +21,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        public SAParameter this[int index]
+        public new SAParameter this[int index]
         {
             get
             {
@@ -34,7 +33,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        public SAParameter this[string parameterName]
+        public new SAParameter this[string parameterName]
         {
             get
             {
@@ -53,13 +52,13 @@ namespace iAnywhere.Data.SQLAnywhere
                 return this;
             }
         }
-
+        
         internal SAParameterCollection()
         {
             _parms = new List<SAParameter>();
         }
 
-        private void CheckArgumentNull(string arg, object value)
+        void CheckArgumentNull(string arg, object value)
         {
             if (value == null)
             {
@@ -68,7 +67,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        private void CheckArgumentType(object value)
+        void CheckArgumentType(object value)
         {
             if (!(value is SAParameter))
             {
@@ -77,7 +76,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        private void CheckIndex(int index)
+        void CheckIndex(int index)
         {
             if (index < 0 || index >= _parms.Count)
             {
@@ -86,7 +85,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        private void CheckIndex(string parameterName)
+        void CheckIndex(string parameterName)
         {
             if (FindIndex(parameterName) < 0)
             {
@@ -114,14 +113,6 @@ namespace iAnywhere.Data.SQLAnywhere
             _parms[index] = (SAParameter)value;
         }
 
-        /// <summary>
-        ///     <para>Sets a parameter in the SAParameterCollection object.</para>
-        /// </summary>
-        /// <param name="parameterName">The name of the parameter to set.</param>
-        /// <param name="value">
-        /// A <see cref="T:System.Data.Common.DbParameter" /> to be inserted into the SAParameterCollection object.
-        ///    </param>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameterCollection" />
         protected override void SetParameter(string parameterName, DbParameter value)
         {
             CheckIndex(parameterName);
@@ -131,22 +122,18 @@ namespace iAnywhere.Data.SQLAnywhere
             _parms[index].ParameterName = parameterName;
         }
 
-        private SAParameter AddParameter()
+        SAParameter AddParameter()
         {
             return Add(new SAParameter("p" + _parms.Count, null));
         }
 
         public override int Add(object value)
         {
-
             CheckArgumentNull("value", value);
             CheckArgumentType(value);
             if (Contains(value))
-            {
-                Exception e = new ArgumentException(SARes.GetString(11016, ((DbParameter)value).ParameterName), "value");
+                throw new ArgumentException(SARes.GetString(11016, ((DbParameter)value).ParameterName), "value");
 
-                throw e;
-            }
             _parms.Add((SAParameter)value);
             return _parms.Count - 1;
         }
@@ -160,7 +147,6 @@ namespace iAnywhere.Data.SQLAnywhere
         {
             return Add(new SAParameter(parameterName, value));
         }
-
 
         public SAParameter Add(string parameterName, SADbType saDbType)
         {
@@ -183,24 +169,16 @@ namespace iAnywhere.Data.SQLAnywhere
             return Add(new SAParameter(parameterName, value));
         }
 
-        /// <summary>
-        ///     <para>Adds an array of values to the end of the SAParameterCollection.</para>
-        /// </summary>
-        /// <param name="values">The values to add.</param>
         public override void AddRange(Array values)
         {
 
             if (values == null)
-                throw new ArgumentNullException("values");
-            foreach (object obj in values)
-            {
-                if (obj.GetType() != typeof(SAParameter))
-                {
-                    Exception e = new ArgumentException(SARes.GetString(15019, obj.GetType().ToString()), "values");
+                throw new ArgumentNullException(nameof(values));
 
-                    throw e;
-                }
-            }
+            foreach (object obj in values)
+                if (obj.GetType() != typeof(SAParameter))
+                    throw new ArgumentException(SARes.GetString(15019, obj.GetType().ToString()), "values");
+
             _parms.AddRange(values.OfType<SAParameter>());
 
         }
@@ -210,14 +188,9 @@ namespace iAnywhere.Data.SQLAnywhere
             AddRange((Array)values);
         }
 
-        /// <summary>
-        ///     <para>Removes all items from the collection.</para>
-        /// </summary>
         public override void Clear()
         {
-
             _parms.Clear();
-
         }
 
         public override bool Contains(object value)
@@ -227,9 +200,7 @@ namespace iAnywhere.Data.SQLAnywhere
 
         public override bool Contains(string value)
         {
-
             return FindIndex(value) >= 0;
-
         }
 
         public override void CopyTo(Array array, int index)
@@ -238,122 +209,52 @@ namespace iAnywhere.Data.SQLAnywhere
             arr.CopyTo(arr, index);
         }
 
-        /// <summary>
-        ///     <para>Returns the location of the SAParameter object in the collection.</para>
-        /// </summary>
-        /// <param name="value">The SAParameter object to locate.</param>
-        /// <returns>
-        /// <para>The zero-based location of the SAParameter object in the collection.</para>
-        ///    </returns>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameter" />
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SAParameterCollection.IndexOf(System.String)" />
         public override int IndexOf(object value)
         {
-
             if (value == null)
                 return -1;
             CheckArgumentType(value);
             return _parms.IndexOf((SAParameter)value);
-
         }
 
-        /// <summary>
-        ///     <para>Returns the location of the SAParameter object in the collection.</para>
-        /// </summary>
-        /// <param name="parameterName">The name of the parameter to locate.</param>
-        /// <returns>
-        /// <para>The zero-based index of the SAParameter object in the collection.</para>
-        ///    </returns>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameter" />
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SAParameterCollection.IndexOf(System.Object)" />
         public override int IndexOf(string parameterName)
         {
-
             return FindIndex(parameterName);
-
         }
 
-        /// <summary>
-        ///     <para>Inserts an SAParameter object in the collection at the specified index.</para>
-        /// </summary>
-        /// <param name="index">
-        ///     The zero-based index where the parameter is to be inserted within the collection.
-        /// </param>
-        /// <param name="value">
-        ///     The SAParameter object to add to the collection.
-        /// </param>
         public override void Insert(int index, object value)
         {
-
             CheckArgumentNull("value", value);
             CheckArgumentType(value);
             _parms.Insert(index, (SAParameter)value);
-
         }
 
-        /// <summary>
-        ///     <para>Removes the specified SAParameter object from the collection.</para>
-        /// </summary>
-        /// <param name="value">
-        ///     The SAParameter object to remove from the collection.
-        /// </param>
         public override void Remove(object value)
         {
-
             CheckArgumentNull("value", value);
             CheckArgumentType(value);
+
             if (!Contains(value))
-            {
-                Exception e = new ArgumentException(SARes.GetString(11015), "value");
+                throw new ArgumentException(SARes.GetString(11015), "value");
 
-                throw e;
-            }
             _parms.Remove((SAParameter)value);
-
         }
 
-        /// <summary>
-        ///     <para>Removes the specified SAParameter object from the collection.</para>
-        /// </summary>
-        /// <param name="index">
-        ///     The zero-based index of the parameter to remove.
-        /// </param>
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SAParameterCollection.RemoveAt(System.String)" />
         public override void RemoveAt(int index)
         {
-
             CheckIndex(index);
             _parms.RemoveAt(index);
-
         }
 
-        /// <summary>
-        ///     <para>Removes the specified SAParameter object from the collection.</para>
-        /// </summary>
-        /// <param name="parameterName">
-        ///     The name of the SAParameter object to remove.
-        /// </param>
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SAParameterCollection.RemoveAt(System.Int32)" />
         public override void RemoveAt(string parameterName)
         {
-
             CheckIndex(parameterName);
             _parms.RemoveAt(FindIndex(parameterName));
-
         }
 
-        /// <summary>
-        ///     <para>Returns an enumerator that iterates through the SAParameterCollection.</para>
-        /// </summary>
-        /// <returns>
-        /// <para>An <see cref="T:System.Collections.IEnumerator" /> for the SAParameterCollection object.</para>
-        ///    </returns>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAParameterCollection" />
         public override IEnumerator GetEnumerator()
         {
-
             return _parms.GetEnumerator();
-
         }
 
         internal int GetRebindParameterCount()
@@ -410,7 +311,7 @@ namespace iAnywhere.Data.SQLAnywhere
                         SAParameter parm = _parms[index2];
                         if (string.Compare(parmNames[index1], parm.ParameterName, true) == 0)
                         {
-                            SetParameterInfo(parm, pParmDM, addValues);
+                            SetParameterInfo(parm, ref pParmDM, addValues);
                             break;
                         }
                     }
@@ -422,14 +323,13 @@ namespace iAnywhere.Data.SQLAnywhere
             {
                 for (int index = 0; index < _parms.Count; ++index)
                 {
-                    pParmDM.Ordinal = index;
-                    SetParameterInfo(_parms[index] as SAParameter, pParmDM, addValues);
-                    pParmDM = ppParmsDM[index + 1];
+                    ppParmsDM[index].Ordinal = index;
+                    SetParameterInfo(_parms[index] as SAParameter, ref ppParmsDM[index], addValues);                    
                 }
             }
         }
 
-        private void SetParameterInfo(SAParameter parm, SAParameterDM pParmDM, bool addValues)
+        void SetParameterInfo(SAParameter parm, ref SAParameterDM pParmDM, bool addValues)
         {
             if (!parm.Rebind)
                 return;
@@ -463,7 +363,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 {
                     pParmDM.Value.IsNull = 0;
                     pParmDM.Value.IsDefault = 0;
-                    SADataItem sa = SADataConvert.DotNetToSA(parm);
+                    var sa = SADataConvert.DotNetToSA(parm);
                     pParmDM.Value.SADataType = sa.SADataType;
                     pParmDM.Value.Length = sa.Length;
                     pParmDM.Value.Value = sa.Value;
@@ -477,14 +377,14 @@ namespace iAnywhere.Data.SQLAnywhere
                     pParmDM.Value.IsNull = 0;
                     pParmDM.Value.IsDefault = 1;
                     pParmDM.Value.Length = 0;
-                    pParmDM.Value.Value = (IntPtr)0;
+                    pParmDM.Value.Value = IntPtr.Zero;
                 }
                 else
                 {
                     pParmDM.Value.IsNull = 1;
                     pParmDM.Value.IsDefault = 0;
                     pParmDM.Value.Length = 0;
-                    pParmDM.Value.Value = (IntPtr)0;
+                    pParmDM.Value.Value = IntPtr.Zero;
                 }
             }
             else
@@ -492,22 +392,17 @@ namespace iAnywhere.Data.SQLAnywhere
                 pParmDM.Value.IsNull = 1;
                 pParmDM.Value.IsDefault = 0;
                 pParmDM.Value.Length = 0;
-                pParmDM.Value.Value = (IntPtr)0;
+                pParmDM.Value.Value = IntPtr.Zero;
             }
         }
 
-        internal void FreeParameterInfo(int count, SAParameterDM[] pParmsDMs)
+        internal void FreeParameterInfo(SAParameterDM[] pParmsDMs)
         {
-            if (count <= 0)
+            if (pParmsDMs == null)
                 return;
 
-            //foreach (var param in pParmsDMs)
-            //{
-            //    SAUnmanagedMemory.Free(param.Value);
-            //    SAUnmanagedMemory.Free(param.Name);
-            //}
-
-            //SAUnmanagedMemory.Free((IntPtr)pParmsDMs);
+            foreach (var param in pParmsDMs)
+                param.Dispose();
         }
 
         internal void GetInputParameterValues(out int count, ref SAValue[] ppValues, string[] allParmNames, string[] inParmNames, bool _namedParms)
@@ -535,7 +430,7 @@ namespace iAnywhere.Data.SQLAnywhere
                                     break;
                                 }
                             }
-                            SetParameterValue(parm, pVal);
+                            SetParameterValue(parm, ref pVal);
                             //++pVal;
                             break;
                         }
@@ -549,15 +444,15 @@ namespace iAnywhere.Data.SQLAnywhere
                     SAParameter parm = _parms[index];
                     if (parm.IsInputParameter())
                     {
-                        pVal.Ordinal = index;
-                        SetParameterValue(parm, pVal);
-                        //++pVal;
+                        ppValues[index].Ordinal = index;
+                        SetParameterValue(parm, ref ppValues[index]);
+                        
                     }
                 }
             }
         }
 
-        void SetParameterValue(SAParameter parm, SAValue pVal)
+        void SetParameterValue(SAParameter parm, ref SAValue pVal)
         {
             if (parm.Value != null && !DBNull.Value.Equals(parm.Value) && !SADefault.Value.Equals(parm.Value))
             {
@@ -588,7 +483,7 @@ namespace iAnywhere.Data.SQLAnywhere
 
         void MapNullParameters()
         {
-            foreach (SAParameter parm in _parms)
+            foreach (var parm in _parms)
             {
                 if (parm.SourceColumnNullMapping && parm.IsNullable && (parm.SourceColumn != null) && (parm.SourceColumn.Trim().Length > 0 && (parm.Direction == ParameterDirection.Input || parm.Direction == ParameterDirection.InputOutput)))
                 {
@@ -605,16 +500,8 @@ namespace iAnywhere.Data.SQLAnywhere
             if (count <= 0)
                 return;
 
-            //foreach (var pValue in pValues)
-            //    SAUnmanagedMemory.Free(pValue.Value);
-
-            //SAValue* saValuePtr = pValues;
-            //for (int index = 0; index < count; ++index)
-            //{
-            //    SAUnmanagedMemory.Free(saValuePtr.Value.Value);
-            //    ++saValuePtr;
-            //}
-            //SAUnmanagedMemory.Free((IntPtr)((void*)pValues));
+            foreach (var pValue in pValues)
+                pValue.Dispose();
         }
 
         int FindIndex(string parameterName)

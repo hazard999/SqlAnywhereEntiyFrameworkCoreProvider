@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace iAnywhere.Data.SQLAnywhere
-{
-    internal struct SADataItem
+{    
+    struct SADataItem : IDisposable
     {
         public int SADataType;
         public int Length;
@@ -19,6 +20,11 @@ namespace iAnywhere.Data.SQLAnywhere
             IsDefault = isDefault;
             Value = val;
             BufferLength = bufferLength;
+        }
+
+        public void Dispose()
+        {
+            SAUnmanagedMemory.Free(Value);
         }
     }
 }

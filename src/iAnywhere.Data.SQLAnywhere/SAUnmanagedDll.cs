@@ -60,42 +60,8 @@ namespace iAnywhere.Data.SQLAnywhere
                 try
                 {
                     string path = string.Format("{0}{1}_{2}", tempDir, str2, num);
-                    s_dllPath = string.Format("{0}\\{1}", path, "dbdata11.dll");
-                    //if (!Directory.Exists(path))
-                    //    Directory.CreateDirectory(path);
-                    //else if (File.Exists(s_dllPath))
-                    //{
-                    //    try
-                    //    {
-                    //        File.Delete(s_dllPath);
-                    //    }
-                    //    catch (Exception ex)
-                    //    {
-                    //        string @string = version.ToString();
-                    //        string str3 = @string.Substring(0, @string.Length - 1);
-                    //        s_hModule = PInvokeMethods.LoadLibrary(s_dllPath);
-                    //        if (s_hModule != IntPtr.Zero)
-                    //        {
-                    //            //TODO: Fix ProcessModule
-                    //            /*
-                    //            foreach (ProcessModule module in (ReadOnlyCollectionBase)Process.GetCurrentProcess().Modules)
-                    //            {
-                    //                if (string.Compare(module.ModuleName, "dbdata11.dll", true) == 0)
-                    //                {
-                    //                    if (module.FileVersionInfo.FileVersion.StartsWith(str3))
-                    //                        return;
-                    //                    break;
-                    //                }
-                    //            }
-                    //            */
-                    //            PInvokeMethods.FreeLibrary(s_hModule);
-                    //            s_hModule = IntPtr.Zero;
-                    //            continue;
-                    //        }
-                    //        continue;
-                    //    }
-                    //}
-                    //CreateDll();
+                    s_dllPath = @"C:\Users\r.grundner\Source\Repos\test\SqlAnywhereEntiyFrameworkCoreProvider\dbdata11.dll";
+
                     s_hModule = PInvokeMethods.LoadLibrary(s_dllPath);
                 }
                 catch (Exception ex)
@@ -154,7 +120,7 @@ namespace iAnywhere.Data.SQLAnywhere
             {
                 using (BinaryWriter binaryWriter = new BinaryWriter(fileStream))
                 {
-                    
+
                     using (Stream manifestResourceStream = Assembly.GetEntryAssembly().GetManifestResourceStream(typeof(SAUnmanagedDll).Namespace + str + SAUnmanagedDll.GetImageType()))
                     {
                         byte[] buffer = null;

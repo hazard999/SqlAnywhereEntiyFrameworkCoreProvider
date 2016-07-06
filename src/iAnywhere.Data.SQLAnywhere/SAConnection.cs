@@ -9,26 +9,25 @@ namespace iAnywhere.Data.SQLAnywhere
 {
     public sealed class SAConnection : DbConnection
     {
-        private bool _showConnFormOnFail = true;
-        private static SAUnmanagedDll s_unmanagedDll = SAUnmanagedDll.Instance;
-        private static int s_currentId = 0;
-        private static int s_openCount = 0;
-        private static string[] s_keyValuePatterns = { "((;|^)(\\s)*{0}(\\s)*=(\\s)*{{(\\s|\\S)*}}(\\s)*([^;])*)", "((;|^)(\\s)*{0}(\\s)*=(\\s)*'(('')|[^'])*'(\\s)*([^;])*)", "((;|^)(\\s)*{0}(\\s)*=(\\s)*\"((\"\")|[^\"])*\"(\\s)*([^;])*)", "((;|^)(\\s)*{0}(\\s)*=([^;])*([^;])*)" };
-        private static SAConnectionPoolManager s_poolManager = new SAConnectionPoolManager();
-        private static Hashtable s_connStrCacheTable = new Hashtable();
-        private static Hashtable s_asaConnStrCached = new Hashtable();
-        private bool _isPooled;
-        private string _connStr;
-        private string _asaConnStr;
-        private string _initString;
-        private string _svrVer;
-        private Hashtable _connOpts;
-        private SAInternalConnection _conn;
-        private SACommand _asyncCmd;
-        private ConnectionState _state;
-        private int _objectId;
-        private bool _isServerSideConnection;
-        private SAInfoMessageDelegate _msgDelegate;
+        bool _showConnFormOnFail = true;
+        static SAUnmanagedDll s_unmanagedDll = SAUnmanagedDll.Instance;
+        static int s_currentId = 0;
+        static int s_openCount = 0;
+        static string[] s_keyValuePatterns = { "((;|^)(\\s)*{0}(\\s)*=(\\s)*{{(\\s|\\S)*}}(\\s)*([^;])*)", "((;|^)(\\s)*{0}(\\s)*=(\\s)*'(('')|[^'])*'(\\s)*([^;])*)", "((;|^)(\\s)*{0}(\\s)*=(\\s)*\"((\"\")|[^\"])*\"(\\s)*([^;])*)", "((;|^)(\\s)*{0}(\\s)*=([^;])*([^;])*)" };
+        static SAConnectionPoolManager s_poolManager = new SAConnectionPoolManager();
+        static Hashtable s_connStrCacheTable = new Hashtable();
+        static Hashtable s_asaConnStrCached = new Hashtable();
+        bool _isPooled;
+        string _connStr;
+        string _asaConnStr;
+        string _initString;
+        string _svrVer;
+        Hashtable _connOpts;
+        SAInternalConnection _conn;
+        SACommand _asyncCmd;
+        ConnectionState _state;
+        int _objectId;
+        bool _isServerSideConnection;
 
         private bool IsServerSideConnection
         {
@@ -72,12 +71,6 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        /// <summary>
-        ///     <para>A command that is executed immediately after the connection is established.</para>
-        /// </summary>
-        /// <remarks>
-        ///     <para>The InitString will be executed immediately after the connection is opened.</para>
-        /// </remarks>
         public string InitString
         {
             get
@@ -90,28 +83,6 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        /// <summary>
-        ///     <para>Provides the database connection string.</para>
-        /// </summary>
-        /// <remarks>
-        ///     <para>The ConnectionString is designed to match the SQL Anywhere connection string format as closely as possible with the following exception: when the Persist Security Info value is set to false (the default), the connection string that is returned is the same as the user-set ConnectionString minus security information. The SQL Anywhere SQL Anywhere .NET Data Provider does not persist the password in a returned connection string unless you set Persist Security Info to true.</para>
-        ///     <para>You can use the ConnectionString property to connect to a variety of data sources.</para>
-        ///     <para>You can set the ConnectionString property only when the connection is closed. Many of the connection string values have corresponding read-only properties. When the connection string is set, all of these properties are updated, unless an error is detected. If an error is detected, none of the properties are updated. SAConnection properties return only those settings contained in the ConnectionString.</para>
-        ///     <para>If you reset the ConnectionString on a closed connection, all connection string values and related properties are reset, including the password.</para>
-        ///     <para>When the property is set, a preliminary validation of the connection string is performed. When an application calls the Open method, the connection string is fully validated. A runtime exception is generated if the connection string contains invalid or unsupported properties.</para>
-        ///     <para>Values can be delimited by single or double quotes. Either single or double quotes may be used within a connection string by using the other delimiter, for example, name="value's" or name= 'value"s', but not name='value's' or name= ""value"". Blank characters are ignored unless they are placed within a value or within quotes. keyword=value pairs must be separated by a semicolon. If a semicolon is part of a value, it must also be delimited by quotes. Escape sequences are not supported, and the value type is irrelevant. Names are not case sensitive. If a property name occurs more than once in the connection string, the value associated with the last occurrence is used.</para>
-        ///     <para>You should use caution when constructing a connection string based on user input, such as when retrieving a user ID and password from a window, and appending it to the connection string. The application should not allow a user to embed extra connection string parameters in these values.</para>
-        ///     <para>The default value of connection pooling is true (pooling=true).</para>
-        /// </remarks>
-        /// <example>
-        ///             <para>The following statements set a connection string for an ODBC data source named SQL Anywhere 11 Demo and open the connection.</para>
-        ///             <code>SAConnection conn = new SAConnection();
-        /// conn.ConnectionString = "DSN=SQL Anywhere 11 Demo";
-        /// conn.Open();</code>
-        /// 
-        ///         </example>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAConnection" />
-        /// <seealso cref="M:iAnywhere.Data.SQLAnywhere.SAConnection.Open" />
         public override string ConnectionString
         {
             get
@@ -123,7 +94,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 {
                     string asaConnStr;
                     Hashtable removedOptions;
-                    SAConnection.AdaptToSAConnectionString(_connStr, out asaConnStr, out removedOptions);
+                    AdaptToSAConnectionString(_connStr, out asaConnStr, out removedOptions);
                     StringBuilder stringBuilder = new StringBuilder(asaConnStr);
                     stringBuilder.Append("[");
                     int num = 0;
@@ -147,7 +118,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 string connStrOut;
                 string removedKey;
                 string removedValue;
-                SAConnection.RemoveKeyValuesFromString(_connStr, SAConnectionOptions.s_passwordKeys, false, out connStrOut, out removedKey, out removedValue);
+                RemoveKeyValuesFromString(_connStr, SAConnectionOptions.s_passwordKeys, false, out connStrOut, out removedKey, out removedValue);
                 return connStrOut;
             }
             set
@@ -162,7 +133,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 }
                 else
                 {
-                    if (SAConnection.s_connStrCacheTable.Contains(value))
+                    if (s_connStrCacheTable.Contains(value))
                     {
                         _connOpts = (Hashtable)s_connStrCacheTable[value];
                         _asaConnStr = (string)s_asaConnStrCached[value];
@@ -170,10 +141,10 @@ namespace iAnywhere.Data.SQLAnywhere
                     else
                     {
                         _connOpts = ParseConnectionString(value);
-                        lock (SAConnection.s_connStrCacheTable.SyncRoot)
+                        lock (s_connStrCacheTable.SyncRoot)
                         {
-                            SAConnection.s_connStrCacheTable[value] = _connOpts;
-                            SAConnection.s_asaConnStrCached[value] = _asaConnStr;
+                            s_connStrCacheTable[value] = _connOpts;
+                            s_asaConnStrCached[value] = _asaConnStr;
                         }
                     }
                     _connStr = value;
@@ -181,7 +152,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        private bool ShowConnectionFormOnFail
+        bool ShowConnectionFormOnFail
         {
             get
             {
@@ -214,7 +185,6 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-
         public override string DataSource
         {
             get
@@ -242,10 +212,9 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-
         internal static string GetNormalizedVersion(string verStr)
         {
-            char[] chArray = new char[2] { '.', '/' };
+            char[] chArray = { '.', '/' };
             string[] strArray = Regex.Match(verStr, "([0-9]{1,2})(.[0-9]{1,2})(.[0-9]{1,2})(.[0-9]{1,4})").Value.Split(chArray);
             return string.Format("{0}.{1}.{2}.{3}", GetNormalizedVersion(strArray[0], 2), GetNormalizedVersion(strArray[1], 2), GetNormalizedVersion(strArray[2], 2), GetNormalizedVersion(strArray[3], 4));
         }
@@ -266,7 +235,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        private bool Enlisted
+        bool Enlisted
         {
             get
             {
@@ -284,32 +253,11 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        public event SAInfoMessageEventHandler InfoMessage;
-        public override event StateChangeEventHandler StateChange;
-
-        /// <summary>
-        ///     <para>Initializes an SAConnection object. The connection must be opened before you can perform any operations against the database.</para>
-        /// </summary>
         public SAConnection()
         {
             Init();
         }
 
-        /// <summary>
-        ///     <para>Initializes an SAConnection object. The connection must then be opened before you can perform any operations against the database.</para>
-        /// </summary>
-        /// <param name="connectionString">
-        ///     A SQL Anywhere connection string. A connection string is a semicolon-separated list of keyword=value pairs.
-        ///     <para>For a list of connection parameters, see @olink targetdoc="dbadmin" targetptr="conmean"@Connection parameters@/olink@.</para>
-        /// </param>
-        /// <example>
-        ///             <para>The following statement initializes an SAConnection object for a connection to a database named policies running on a SQL Anywhere database server named hr. The connection uses the user ID admin and the password money.</para>
-        ///             <code>SAConnection conn = new SAConnection(
-        /// "UID=admin;PWD=money;ENG=hr;DBN=policies" );
-        /// conn.Open();</code>
-        /// 
-        ///         </example>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAConnection" />
         public SAConnection(string connectionString)
         {
             Init();
@@ -326,17 +274,14 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        /// <summary>
-        ///     <para>Destructs an SAConnection object.</para>
-        /// </summary>
-        private static int GetPoolCount()
+        static int GetPoolCount()
         {
-            return SAConnection.s_poolManager.GetPoolCount();
+            return s_poolManager.GetPoolCount();
         }
 
-        private static int GetPooledConnectionCount()
+        static int GetPooledConnectionCount()
         {
-            return SAConnection.s_poolManager.GetConnectionCount();
+            return s_poolManager.GetConnectionCount();
         }
 
         public override void Close()
@@ -361,7 +306,7 @@ namespace iAnywhere.Data.SQLAnywhere
             if (_conn.Enlisted)
                 _conn.Disposed = true;
             else if (_conn.Pooled)
-                SAConnection.s_poolManager.ReturnConnection(_conn);
+                s_poolManager.ReturnConnection(_conn);
             else
                 _conn.Close();
             FireStateChange(ConnectionState.Open, ConnectionState.Closed);
@@ -369,13 +314,13 @@ namespace iAnywhere.Data.SQLAnywhere
             _conn = null;
         }
 
-        private void Init()
+        void Init()
         {
             _initString = null;
             _connStr = null;
             _connOpts = null;
             _conn = null;
-            _objectId = SAConnection.s_currentId++;
+            _objectId = s_currentId++;
             _state = ConnectionState.Closed;
         }
 
@@ -426,80 +371,44 @@ namespace iAnywhere.Data.SQLAnywhere
             return saTransaction;
         }
 
-        /// <summary>
-        ///     <para>Changes the current database for an open SAConnection.</para>
-        /// </summary>
-        /// <param name="database">
-        ///     The name of the database to use instead of the current database.
-        /// </param>
-        public override void ChangeDatabase(string database)
+        public override void ChangeDatabase(string databaseName)
         {
             if (_state != ConnectionState.Open)
             {
                 Exception e = new InvalidOperationException(SARes.GetString(10983));
                 throw e;
             }
-            if (database == null || database.Trim().Length < 1)
+            if (databaseName == null || databaseName.Trim().Length < 1)
             {
-                Exception e = new ArgumentException(SARes.GetString(10984), "database");
+                Exception e = new ArgumentException(SARes.GetString(10984), nameof(databaseName));
                 throw e;
             }
             Close();
             string connStrOut;
             string removedKey;
             string removedValue;
-            SAConnection.RemoveKeyValuesFromString(_connStr, SAConnectionOptions.s_databaseKeys, false, out connStrOut, out removedKey, out removedValue);
+            RemoveKeyValuesFromString(_connStr, SAConnectionOptions.s_databaseKeys, false, out connStrOut, out removedKey, out removedValue);
             StringBuilder stringBuilder = new StringBuilder(connStrOut);
-            if (database.IndexOf('\\') >= 0)
+            if (databaseName.IndexOf('\\') >= 0)
                 stringBuilder.Append(";dbf=");
             else
                 stringBuilder.Append(";dbn=");
             stringBuilder.Append('\'');
-            stringBuilder.Append(database.Trim().Replace("'", "''"));
+            stringBuilder.Append(databaseName.Trim().Replace("'", "''"));
             stringBuilder.Append('\'');
             ConnectionString = stringBuilder.ToString();
             Open();
         }
 
-        /// <summary>
-        ///     <para>Creates and returns a <see cref="T:System.Data.Common.DbCommand" /> object associated with the current connection.</para>
-        /// </summary>
-        /// <returns>
-        /// <para>A <see cref="T:System.Data.Common.DbCommand" /> object.</para>
-        /// </returns>
-        protected override DbCommand CreateDbCommand()
-        {
-            return CreateCommand();
-        }
-
-        /// <summary>
-        ///     <para>Initializes an SACommand object.</para>
-        /// </summary>
-        /// <remarks>
-        ///     <para>The command object is associated with the SAConnection object.</para>
-        /// </remarks>
-        /// <returns>
-        /// <para>An SACommand object.</para>
-        /// </returns>
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SACommand" />
-        /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAConnection" />
-        public SACommand CreateCommand()
-        {
-            return new SACommand("", this, Transaction);
-        }
-
-        /// <summary>
-        ///     <para>Opens a database connection with the property settings specified by the SAConnection.ConnectionString.</para>
-        /// </summary>
-        /// <seealso cref="P:iAnywhere.Data.SQLAnywhere.SAConnection.ConnectionString" />
         public override void Open()
         {
-            ++SAConnection.s_openCount;
+            ++s_openCount;
 
             if (_state == ConnectionState.Open)
             {
                 throw new InvalidOperationException(SARes.GetString(10985));
             }
+
             if (_connStr == null || _connStr.Trim().Length < 1)
             {
                 throw new InvalidOperationException(SARes.GetString(10986, "ConnectionString"));
@@ -562,17 +471,17 @@ namespace iAnywhere.Data.SQLAnywhere
 
         }
 
-        private static int GetOpenCount()
+        static int GetOpenCount()
         {
-            return SAConnection.s_openCount;
+            return s_openCount;
         }
 
-        private static void ResetOpenCount()
+        static void ResetOpenCount()
         {
-            SAConnection.s_openCount = 0;
+            s_openCount = 0;
         }
 
-        private string GetInitString()
+        string GetInitString()
         {
             string str;
             if (_initString != null)
@@ -590,7 +499,7 @@ namespace iAnywhere.Data.SQLAnywhere
             return str;
         }
 
-        private Hashtable ParseConnectionString(string connStr)
+        Hashtable ParseConnectionString(string connStr)
         {
             int idParser = 0;
             int count = 0;
@@ -659,12 +568,9 @@ namespace iAnywhere.Data.SQLAnywhere
             return removedOptions;
         }
 
-        /// <summary>
-        ///     <para>Empties all connection pools.</para>
-        /// </summary>
         public static void ClearAllPools()
         {
-            SAConnection.s_poolManager.ClearAllPools();
+            s_poolManager.ClearAllPools();
         }
 
         /// <summary>
@@ -676,7 +582,7 @@ namespace iAnywhere.Data.SQLAnywhere
         /// <seealso cref="T:iAnywhere.Data.SQLAnywhere.SAConnection" />
         public static void ClearPool(SAConnection connection)
         {
-            SAConnection.s_poolManager.ClearPool(connection);
+            s_poolManager.ClearPool(connection);
         }
 
         private static void CheckConnectionOptions(Hashtable connOptions)
@@ -685,12 +591,12 @@ namespace iAnywhere.Data.SQLAnywhere
             CheckBoolConnectionOption(connOptions, "enlist");
             CheckBoolConnectionOption(connOptions, "connection reset");
             CheckBoolConnectionOption(connOptions, "persist security info");
-            SAConnection.CheckIntConnectionOption(connOptions, "connect timeout");
-            SAConnection.CheckIntConnectionOption(connOptions, "connection timeout");
-            SAConnection.CheckIntConnectionOption(connOptions, "connection lifetime");
-            SAConnection.CheckIntConnectionOption(connOptions, "min pool size");
+            CheckIntConnectionOption(connOptions, "connect timeout");
+            CheckIntConnectionOption(connOptions, "connection timeout");
+            CheckIntConnectionOption(connOptions, "connection lifetime");
+            CheckIntConnectionOption(connOptions, "min pool size");
             string str1 = "max pool size";
-            SAConnection.CheckIntConnectionOption(connOptions, str1);
+            CheckIntConnectionOption(connOptions, str1);
             if (connOptions.Contains(str1) && Convert.ToInt32(connOptions[str1]) == 0)
             {
                 Exception e = new ArgumentException(SARes.GetString(10978, str1, (string)connOptions[str1]), "value");
@@ -705,7 +611,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        private static void CheckBoolConnectionOption(Hashtable connOptions, string key)
+        static void CheckBoolConnectionOption(Hashtable connOptions, string key)
         {
             if (!connOptions.Contains(key))
                 return;
@@ -714,14 +620,13 @@ namespace iAnywhere.Data.SQLAnywhere
             {
                 Convert.ToBoolean(parm2);
             }
-            catch (Exception ex)
+            catch
             {
-                Exception e = new ArgumentException(SARes.GetString(10978, key, parm2), "value");
-                throw e;
+                throw new ArgumentException(SARes.GetString(10978, key, parm2), "value");
             }
         }
 
-        private static void CheckIntConnectionOption(Hashtable connOptions, string key)
+        static void CheckIntConnectionOption(Hashtable connOptions, string key)
         {
             if (!connOptions.Contains(key))
                 return;
@@ -731,15 +636,14 @@ namespace iAnywhere.Data.SQLAnywhere
             {
                 int32 = Convert.ToInt32(parm2);
             }
-            catch (Exception ex)
+            catch
             {
-                Exception e = new ArgumentException(SARes.GetString(10978, key, parm2), "value");
-                throw e;
+                throw new ArgumentException(SARes.GetString(10978, key, parm2), "value");
             }
+
             if (int32 < 0)
             {
-                Exception e = new ArgumentException(SARes.GetString(10978, key, parm2), "value");
-                throw e;
+                throw new ArgumentException(SARes.GetString(10978, key, parm2), "value");
             }
         }
 
@@ -826,11 +730,9 @@ namespace iAnywhere.Data.SQLAnywhere
             return str;
         }
 
-        private void FireStateChange(ConnectionState originalState, ConnectionState currentState)
+        void FireStateChange(ConnectionState originalState, ConnectionState currentState)
         {
-            if (StateChange == null)
-                return;
-            StateChange(this, new StateChangeEventArgs(originalState, currentState));
+            OnStateChange(new StateChangeEventArgs(originalState, currentState));
         }
 
         internal void UnPool()
@@ -838,6 +740,11 @@ namespace iAnywhere.Data.SQLAnywhere
             if (!_isPooled)
                 return;
             _isPooled = false;
+        }
+
+        protected override DbCommand CreateDbCommand()
+        {
+            return new SACommand("", this);
         }
     }
 }

@@ -62,15 +62,15 @@ namespace iAnywhere.Data.SQLAnywhere
             int nativeError = 0;
             string msg = null;
             string sqlState = null;
-            SAErrorCollection.FreeException(PInvokeMethods.AsaException_GetErrorCount(idEx, ref count));
+            FreeException(PInvokeMethods.AsaException_GetErrorCount(idEx, ref count));
             SAErrorCollection saErrorCollection = new SAErrorCollection();
             for (int errorIndex = 0; errorIndex < count; ++errorIndex)
             {
-                SAErrorCollection.GetErrorInfo(idEx, errorIndex, ref nativeError, ref sqlState, ref msg);
+                GetErrorInfo(idEx, errorIndex, ref nativeError, ref sqlState, ref msg);
                 SAError saError = new SAError(nativeError, msg, sqlState);
                 saErrorCollection._errors.Add(saError);
             }
-            SAErrorCollection.FreeException(idEx);
+            FreeException(idEx);
             return saErrorCollection;
         }
 
@@ -109,7 +109,7 @@ namespace iAnywhere.Data.SQLAnywhere
             int bufLenMsg = 128;
             char[] chArray2 = new char[bufLenMsg];
 
-            SAErrorCollection.FreeException(PInvokeMethods.AsaException_GetErrorInfo(idEx, errorIndex, ref nativeError, chArray1, bufLenSqlState, ref lenSqlState, chArray2, bufLenMsg, ref lenMsg));
+            FreeException(PInvokeMethods.AsaException_GetErrorInfo(idEx, errorIndex, ref nativeError, chArray1, bufLenSqlState, ref lenSqlState, chArray2, bufLenMsg, ref lenMsg));
             bool flag = false;
             if (bufLenSqlState < lenSqlState)
             {
@@ -125,7 +125,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
             if (flag)
             {
-                SAErrorCollection.FreeException(PInvokeMethods.AsaException_GetErrorInfo(idEx, errorIndex, ref nativeError, chArray1, bufLenSqlState, ref lenSqlState, chArray2, bufLenMsg, ref lenMsg));
+                FreeException(PInvokeMethods.AsaException_GetErrorInfo(idEx, errorIndex, ref nativeError, chArray1, bufLenSqlState, ref lenSqlState, chArray2, bufLenMsg, ref lenMsg));
             }
             sqlState = new string(chArray1, 0, lenSqlState);
             msg = new string(chArray2, 0, lenMsg);

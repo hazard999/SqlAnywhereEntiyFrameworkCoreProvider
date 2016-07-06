@@ -2,9 +2,9 @@
 {
     public sealed class SAError
     {
-        private int _nativeError;
-        private string _message;
-        private string _sqlState;
+        int _nativeError;
+        string _message;
+        string _sqlState;
 
         public int NativeError
         {
