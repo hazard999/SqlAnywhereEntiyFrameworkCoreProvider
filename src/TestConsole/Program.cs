@@ -4,16 +4,25 @@ using System.Data.Common;
 
 namespace TestConsole
 {
-
-
     public class Program
     {
+        static SAConnection conn;
+
         static DbCommand GetDBCommand()
         {
-            var conn = new SAConnection(GetConnectionString());
-            conn.Open();
+            var conn = GetConnection();
 
             return conn.CreateCommand();
+        }
+
+        static SAConnection GetConnection()
+        {
+            if (conn != null)
+                return conn;
+
+            conn = new SAConnection(GetConnectionString());
+            conn.Open();
+            return conn;
         }
 
         static string GetConnectionString()
@@ -26,19 +35,38 @@ namespace TestConsole
             return fac.ToString();
         }
 
-
         public static void Main(string[] args)
         {
-            var cmd = GetDBCommand();
-            cmd.CommandText = "SELECT * FROM KANZLEI";
-            using (var reader = cmd.ExecuteReader())
+            //using (var cmd = GetDBCommand())
+            //{
+            //    cmd.CommandText = "SELECT * FROM KG_PG";
+            //    using (var reader = cmd.ExecuteReader())
+            //    {
+            //        while (reader.Read())
+            //        {
+            //            for (var i = 0; i < reader.FieldCount; i++) { }                            
+            //        }
+            //    }               
+            //}
+
+            using (var cmd = GetDBCommand())
             {
-                while (reader.Read())
+                cmd.CommandText = "SELECT * FROM KG_PG WHERE PGNAME = :p1";
+                var param = cmd.CreateParameter();
+                param.Value = "Graz";
+                cmd.Parameters.Add(param);
+
+                using (var reader = cmd.ExecuteReader())
                 {
-                    for (var i = 0; i < reader.FieldCount; i++)
-                        Console.WriteLine(reader.GetName(i) + ": " + reader.GetString(i));
+                    while (reader.Read())
+                    {
+                        for (var i = 0; i < reader.FieldCount; i++)
+                            Console.WriteLine(reader.GetName(i) + ": " + reader.GetString(i));
+                    }
                 }
             }
+
+            conn.Dispose();
 
             Console.ReadKey();
         }

@@ -110,25 +110,17 @@ namespace iAnywhere.Data.SQLAnywhere
                 return _isClosed;
             }
         }
-
-        /// <summary>
-        ///     <para>Returns the value of a column in its native format. In C#, this property is the indexer for the SADataReader class.</para>
-        /// </summary>
-        /// <param name="index">The column ordinal.</param>
-        public override object this[int index]
+        
+        public override object this[int ordinal]
         {
             get
             {
                 CheckInvalidRead();
-                CheckIndex(index);
-                return GetValue(index);
+                CheckIndex(ordinal);
+                return GetValue(ordinal);
             }
         }
 
-        /// <summary>
-        ///     <para>Returns the value of a column in its native format. In C#, this property is the indexer for the SADataReader class.</para>
-        /// </summary>
-        /// <param name="name">The column name.</param>
         public override object this[string name]
         {
             get
@@ -149,15 +141,6 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        /// <summary>
-        ///     The number of rows changed, inserted, or deleted by execution of the SQL statement.
-        /// </summary>
-        /// <value>The number of rows changed, inserted, or deleted. This is 0 if no rows were affected or the statement failed, or -1 for SELECT statements.</value>
-        /// <remarks>
-        ///     <para>The number of rows changed, inserted, or deleted. The value is 0 if no rows were affected or the statement failed, and -1 for SELECT statements.</para>
-        ///     <para>The value of this property is cumulative. For example, if two records are inserted in batch mode, the value of RecordsAffected will be two.</para>
-        ///     <para>IsClosed and RecordsAffected are the only properties that you can call after the SADataReader is closed.</para>
-        /// </remarks>
         public override int RecordsAffected
         {
             get
@@ -259,60 +242,40 @@ namespace iAnywhere.Data.SQLAnywhere
         void CheckClosed(string methodName)
         {
             if (_isClosed)
-            {
-                Exception e = new InvalidOperationException(SARes.GetString(11005, methodName));
-                throw e;
-            }
+                throw new InvalidOperationException(SARes.GetString(11005, methodName));
         }
 
         void CheckClosed()
         {
             if (_isClosed)
-            {
-                Exception e = new InvalidOperationException(SARes.GetString(11004));
-                throw e;
-            }
+                throw new InvalidOperationException(SARes.GetString(11004));
         }
 
         void CheckInvalidRead()
         {
             if (_isClosed)
-            {
-                Exception e = new InvalidOperationException(SARes.GetString(11004));
-                throw e;
-            }
+                throw new InvalidOperationException(SARes.GetString(11004));
+
             if (!_hasResult || _numOfReadCalls < 2 || !_hasData)
-            {
-                Exception e = new InvalidOperationException(SARes.GetString(11003));
-                throw e;
-            }
+                throw new InvalidOperationException(SARes.GetString(11003));
         }
 
         void CheckIndex(int index)
         {
             if (index < 0 || index >= _fieldCount)
-            {
-                Exception e = new IndexOutOfRangeException();
-                throw e;
-            }
+                throw new IndexOutOfRangeException();
         }
 
         void CheckDBNull(int index)
         {
             if (IsDBNull(index))
-            {
-                Exception e = new SAException(SARes.GetString(11017));
-                throw e;
-            }
+                throw new SAException(SARes.GetString(11017));
         }
 
         void CheckBuffer(Array buffer, int bufferIndex, int length)
         {
             if (bufferIndex < 0 || bufferIndex + length > buffer.Length)
-            {
-                Exception e = new ArgumentOutOfRangeException("bufferIndex");
-                throw e;
-            }
+                throw new ArgumentOutOfRangeException(nameof(bufferIndex));
         }
 
         object FetchValue(int ordinal, DotNetType dotNetType, bool isGetValue)
@@ -640,7 +603,7 @@ namespace iAnywhere.Data.SQLAnywhere
             CheckClosed();
             if (name == null)
             {
-                Exception e = new ArgumentNullException("name");
+                Exception e = new ArgumentNullException(nameof(name));
 
                 throw e;
             }

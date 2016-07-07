@@ -3,8 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
-    /// <summary>Summary description for SAUtility</summary>
-    internal sealed class SAUtility
+    sealed class SAUtility
     {
         public static char[] GetCharArray(string str)
         {
@@ -16,9 +15,10 @@ namespace iAnywhere.Data.SQLAnywhere
             if (str == null)
                 return IntPtr.Zero;
 
-            var ptr = Marshal.AllocHGlobal(Marshal.SizeOf(str));
-            Marshal.StructureToPtr(str, ptr, false);
-            return ptr;
+            var chPtr = SAUnmanagedMemory.Alloc((str.Length + 1) * 2);
+            var charArray = str.ToCharArray();
+            Marshal.Copy(charArray, 0, chPtr, charArray.Length);
+            return chPtr;            
         }
 
         public static string EscapeQuotationMarks(char quotationMark, string str)
@@ -34,19 +34,13 @@ namespace iAnywhere.Data.SQLAnywhere
         public static void CheckStringArgument(string argVal, string argName)
         {
             if (string.IsNullOrEmpty(argVal) || argVal.Trim().Length < 1)
-            {
-                Exception e = new ArgumentException(SARes.GetString(25994, argName), argName);
-                throw e;
-            }
+                throw new ArgumentException(SARes.GetString(25994, argName), argName);
         }
 
         public static void CheckArgumentNull(object argVal, string argName)
         {
             if (argVal == null)
-            {
-                ArgumentNullException argumentNullException = new ArgumentNullException(argName);
-                throw argumentNullException;
-            }
+                throw new ArgumentNullException(argName);
         }
 
         public static bool CompareString(string str1, string str2)

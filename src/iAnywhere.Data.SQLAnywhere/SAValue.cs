@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
-    struct SAValue
+    struct SAValue:IDisposable
     {
         public int Ordinal;
         public SADataItem Value;
@@ -12,6 +12,11 @@ namespace iAnywhere.Data.SQLAnywhere
         {
             Ordinal = ordinal;
             Value = value;
+        }
+
+        public void Dispose()
+        {
+            Value.Dispose();
         }
     }
 
@@ -22,9 +27,15 @@ namespace iAnywhere.Data.SQLAnywhere
             if (@params == null)
                 return IntPtr.Zero;
 
-            var ptr = new IntPtr();
+            var recordSize = Marshal.SizeOf<SAValue>();
+            var ptr = Marshal.AllocHGlobal(recordSize * @params.Length);
+            var assignPrt = ptr;
+            foreach (var param in @params)
+            {
+                Marshal.StructureToPtr(param, assignPrt, false);
 
-            Marshal.StructureToPtr(@params, ptr, true);
+                assignPrt = IntPtr.Add(assignPrt, recordSize);
+            }
 
             return ptr;
 

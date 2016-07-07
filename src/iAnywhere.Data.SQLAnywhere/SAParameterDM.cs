@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
-    struct SAParameterDM
+    struct SAParameterDM : IDisposable
     {
         public int Ordinal;
         public IntPtr Name;
@@ -25,6 +25,12 @@ namespace iAnywhere.Data.SQLAnywhere
             Scale = scale;
             Value = value;
         }
+
+        public void Dispose()
+        {
+            SAUnmanagedMemory.Free(Name);
+            Value.Dispose();
+        }
     }
 
     static class SAParameterDMExtensions
@@ -34,9 +40,16 @@ namespace iAnywhere.Data.SQLAnywhere
             if (@params == null)
                 return IntPtr.Zero;
 
-            var ptr = Marshal.AllocHGlobal(Marshal.SizeOf(@params));
+            var recordSize = Marshal.SizeOf<SAParameterDM>();
+            var ptr = Marshal.AllocHGlobal(recordSize * @params.Length);
+            var assignPrt = ptr;
+            foreach (var param in @params)
+            {
 
-            Marshal.StructureToPtr(@params, ptr, true);
+                Marshal.StructureToPtr(param, assignPrt, false);
+
+                assignPrt = IntPtr.Add(assignPrt, recordSize);
+            }
 
             return ptr;
 

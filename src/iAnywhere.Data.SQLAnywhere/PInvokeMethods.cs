@@ -98,7 +98,7 @@ namespace iAnywhere.Data.SQLAnywhere
         [DllImport("dbdata11.dll")]
         public static extern int AsaException_GetErrorCount(int idEx, ref int count);
 
-        [DllImport("dbdata11.dll")]
+        [DllImport("dbdata11.dll", CharSet = CharSet.Unicode)]
         public static extern int AsaException_GetErrorInfo(int idEx, int errorIndex, ref int nativeError, char[] bufSqlState, int bufLenSqlState, ref int lenSqlState, char[] bufMsg, int bufLenMsg, ref int lenMsg);
 
         [DllImport("dbdata11.dll")]
