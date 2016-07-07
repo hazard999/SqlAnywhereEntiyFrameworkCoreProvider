@@ -86,8 +86,7 @@ namespace iAnywhere.Data.SQLAnywhere
             {
                 if (value == CommandType.TableDirect)
                     throw new ArgumentException(SARes.GetString(10996), nameof(value));
-
-
+                
                 if (_cmdType != value)
                     Unprepare();
                 _cmdType = value;

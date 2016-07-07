@@ -58,7 +58,6 @@ namespace EntityFrameworkCore.RelationalProviderStarter.Storage
         public override IValueGeneratorSelector ValueGeneratorSelector => GetService<SqlAnywhereValueGeneratorSelector>();
 
         public override IRelationalTypeMapper TypeMapper => GetService<SqlAnywhereTypeMapper>();
-
         //public override IDatabase Database => GetService<SqlAnywhereDatabase>();
 
         //public override IModelValidator ModelValidator

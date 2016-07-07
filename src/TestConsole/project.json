@@ -5,6 +5,7 @@
   },
 
   "dependencies": {
+    "EFCoreTest": "1.0.0-*",
     "iAnywhere.Data.SQLAnywhere": "1.0.0-*",
     "Microsoft.NETCore.App": {
       "type": "platform",

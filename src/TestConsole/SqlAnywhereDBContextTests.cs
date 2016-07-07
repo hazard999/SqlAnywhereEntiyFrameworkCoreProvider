@@ -1,19 +1,16 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Xunit;
 
 namespace Provider.Tests
 {
     public class SqlAnywhereDBContextTests
     {
-        [Theory]
         public void NewSqlAnyhwereDBContectShouldNotThrowOnNew()
         {
             var context = new TestDBContext();
         }
 
-        [Theory]
-        public void AddNewBlogPostShouldAffect1Record()
+        public int AddNewBlogPostShouldAffect1Record()
         {
             using (var db = new TestDBContext())
             {
@@ -25,12 +22,10 @@ namespace Provider.Tests
                 var blog = new Blog { BlogId = 1, Url = "http://blogs.msdn.com/adonet" };
                 db.Blogs.Add(blog);
 
-                var count = db.SaveChanges();
-                Assert.Equal(1, count);
+                return db.SaveChanges();
             }
         }
 
-        [Theory]
         public async Task AddNewBlogPostAsyncShouldAffect1Record()
         {
             using (var db = new TestDBContext())
@@ -39,12 +34,9 @@ namespace Provider.Tests
                 db.Blogs.Add(blog);
 
                 var count = await db.SaveChangesAsync();
-
-                Assert.Equal(1, count);
             }
         }
 
-        [Theory]
         public void AddNewBlogPostAutoincrementingShouldNotThrow()
         {
             using (var db = new TestDBContext())
@@ -55,15 +47,11 @@ namespace Provider.Tests
             }
         }
 
-        [Theory]
-        public void BlogsShouldContainOne()
+        public int BlogsShouldContainOne()
         {
-
-
             using (var db = new TestDBContext())
             {
-                Assert.Equal(1, db.Blogs.ToList().Count);
-
+                return db.Blogs.ToList().Count;
             }
         }
     }

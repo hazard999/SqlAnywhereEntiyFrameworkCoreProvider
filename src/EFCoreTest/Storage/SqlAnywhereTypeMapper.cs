@@ -43,12 +43,12 @@ namespace SqlAnywhereProvider.Storage
         
         protected override IReadOnlyDictionary<Type, RelationalTypeMapping> GetClrTypeMappings()
         {
-            throw new NotImplementedException();
+            return _simpleMappings;
         }
 
         protected override IReadOnlyDictionary<string, RelationalTypeMapping> GetStoreTypeMappings()
         {
-            throw new NotImplementedException();
+            return _simpleNameMappings;
         }
     }
 }

@@ -263,8 +263,7 @@ namespace iAnywhere.Data.SQLAnywhere
                     SAException.FreeException(PInvokeMethods.AsaConnection_Close(_idConn));
                     _idConn = 0;
                 }
-                SAException instance = SAException.CreateInstance(idEx);
-                throw instance;
+                throw SAException.CreateInstance(idEx);
             }
         }
 

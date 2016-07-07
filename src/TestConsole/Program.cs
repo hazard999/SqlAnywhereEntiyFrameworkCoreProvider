@@ -1,4 +1,5 @@
 ﻿using iAnywhere.Data.SQLAnywhere;
+using Provider.Tests;
 using System;
 using System.Data.Common;
 
@@ -28,7 +29,7 @@ namespace TestConsole
         static string GetConnectionString()
         {
             var fac = new SAConnectionStringBuilder();
-            fac.ServerName = "paradat11";
+            fac.ServerName = "test";
             fac.UserID = "dba";
             fac.Password = "sql";
             fac.Integrated = "true";
@@ -37,23 +38,21 @@ namespace TestConsole
 
         public static void Main(string[] args)
         {
-            //using (var cmd = GetDBCommand())
-            //{
-            //    cmd.CommandText = "SELECT * FROM KG_PG";
-            //    using (var reader = cmd.ExecuteReader())
-            //    {
-            //        while (reader.Read())
-            //        {
-            //            for (var i = 0; i < reader.FieldCount; i++) { }                            
-            //        }
-            //    }               
-            //}
+            new SqlAnywhereDBContextTests().NewSqlAnyhwereDBContectShouldNotThrowOnNew();
+            new SqlAnywhereDBContextTests().AddNewBlogPostShouldAffect1Record();
+                //TestSelect();
 
+            Console.WriteLine("Finished");
+            Console.ReadKey();
+        }
+
+        private static void NewMethod()
+        {
             using (var cmd = GetDBCommand())
             {
-                cmd.CommandText = "SELECT * FROM KG_PG WHERE PGNAME = :p1";
+                cmd.CommandText = "SELECT * FROM BLOG WHERE blogid = :p1";
                 var param = cmd.CreateParameter();
-                param.Value = "Graz";
+                param.Value = "1";
                 cmd.Parameters.Add(param);
 
                 using (var reader = cmd.ExecuteReader())
@@ -67,8 +66,6 @@ namespace TestConsole
             }
 
             conn.Dispose();
-
-            Console.ReadKey();
         }
     }
 }

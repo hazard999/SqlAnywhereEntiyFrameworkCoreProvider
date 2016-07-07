@@ -358,8 +358,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
             if (isolationLevel == SAIsolationLevel.Chaos || isolationLevel == SAIsolationLevel.Unspecified)
             {
-                Exception e = new ArgumentException(SARes.GetString(17016), "isolationLevel");
-                throw e;
+                isolationLevel = SAIsolationLevel.ReadCommitted;
             }
             if (_conn.Enlisted)
             {
