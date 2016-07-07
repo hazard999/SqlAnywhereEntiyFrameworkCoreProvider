@@ -734,8 +734,8 @@ namespace iAnywhere.Data.SQLAnywhere
                 case SADbType.BigInt:
                     long num1 = !(obj is long) ? Convert.ToInt64(obj) : (long)obj;
                     saDataItem.Length = Marshal.SizeOf<long>();
-                    saDataItem.Value = SAUnmanagedMemory.Alloc(saDataItem.Length);
-                    Marshal.StructureToPtr<long>(num1, saDataItem.Value, true);
+                    saDataItem.Value = Marshal.AllocHGlobal(saDataItem.Length);
+                    Marshal.StructureToPtr(num1, saDataItem.Value, true);
                     break;
                 case SADbType.Binary:
                 case SADbType.Image:

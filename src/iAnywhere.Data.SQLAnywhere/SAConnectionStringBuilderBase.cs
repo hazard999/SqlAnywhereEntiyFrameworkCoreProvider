@@ -1,10 +1,4 @@
-﻿
-// Type: iAnywhere.Data.SQLAnywhere.SAConnectionStringBuilderBase
-// Assembly: iAnywhere.Data.SQLAnywhere.v4.0, Version=11.0.1.27424, Culture=neutral, PublicKeyToken=f222fc4333e0d400
-// MVID: CC4F9F8C-E618-49D1-9147-C06A9EF53D1F
-// Assembly location: C:\Program Files\SQL Anywhere 11\Assembly\V4\iAnywhere.Data.SQLAnywhere.v4.0.dll
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -20,12 +14,6 @@ namespace iAnywhere.Data.SQLAnywhere
         private bool _useLongNameAsKeyword = true;
         private Dictionary<string, ConnectionOptions> _connOptions;
 
-        /// <summary>
-        ///     <para>Gets an System.Collections.ICollection that contains the keys in the SAConnectionStringBuilder.</para>
-        /// </summary>
-        /// <returns>
-        /// <para>An System.Collections.ICollection that contains the keys in the SAConnectionStringBuilder.</para>
-        ///    </returns>
         public override ICollection Keys
         {
             get
@@ -38,15 +26,6 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        /// <summary>
-        ///     <para>Gets or sets the value of the connection keyword.</para>
-        /// </summary>
-        /// <value>An object representing the value of the specified connection keyword.</value>
-        /// <remarks>
-        ///     <para>If the keyword or type is invalid, an exception is raised. keyword is case insensitive.</para>
-        ///     <para>When setting the value, passing NULL clears the value.</para>
-        /// </remarks>
-        /// <param name="keyword">The name of the connection keyword.</param>
         public override object this[string keyword]
         {
             get

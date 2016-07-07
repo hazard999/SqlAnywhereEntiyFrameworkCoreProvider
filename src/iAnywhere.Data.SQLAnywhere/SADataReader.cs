@@ -3,7 +3,6 @@ using System.Collections;
 using System.Data;
 using System.Data.Common;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
@@ -679,19 +678,16 @@ namespace iAnywhere.Data.SQLAnywhere
             return (string)value;
         }
 
-        [CLSCompliant(false)]
         public ushort GetUInt16(int ordinal)
         {
             return (ushort)FetchValue(ordinal, DotNetType.UInt16, false);
         }
 
-        [CLSCompliant(false)]
         public uint GetUInt32(int ordinal)
         {
             return (uint)FetchValue(ordinal, DotNetType.UInt32, false);
         }
 
-        [CLSCompliant(false)]
         public ulong GetUInt64(int ordinal)
         {
             return (ulong)FetchValue(ordinal, DotNetType.UInt64, false);

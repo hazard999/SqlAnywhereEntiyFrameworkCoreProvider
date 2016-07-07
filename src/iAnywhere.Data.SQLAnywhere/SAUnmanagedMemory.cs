@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
@@ -8,14 +9,15 @@ namespace iAnywhere.Data.SQLAnywhere
 
         public static IntPtr Alloc(int size)
         {
-            return PInvokeMethods.LocalAlloc(64U, new UIntPtr(Convert.ToUInt32(size)));
+            return Marshal.AllocHGlobal(size);
         }
 
         public static void Free(IntPtr hMem)
         {
             if (!(hMem != IntPtr.Zero))
                 return;
-            PInvokeMethods.LocalFree(hMem);
+
+            Marshal.FreeHGlobal(hMem);
         }
     }
 }

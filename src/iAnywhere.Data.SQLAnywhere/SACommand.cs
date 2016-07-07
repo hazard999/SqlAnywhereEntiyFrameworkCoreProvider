@@ -16,7 +16,6 @@ namespace iAnywhere.Data.SQLAnywhere
         private bool _getOutputParms = true;
         private int _objectId = s_CurrentId++;
         private int _timeout;
-        private bool _designTimeVisible;
         private string _cmdText;
         private SAConnection _conn;
         private SATransaction _asaTran;
@@ -24,7 +23,6 @@ namespace iAnywhere.Data.SQLAnywhere
         private SAParameterCollection _parmsOld;
         private bool _namedParms;
         private CommandType _cmdType;
-        private UpdateRowSource _updatedRowSrc;
         private bool _isExecuting;
         private bool _isPrepared;
         private int _idCmd;
@@ -112,43 +110,11 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        public SAConnection Connection
-        {
-            get
-            {
-                return (SAConnection)DbConnection;
-            }
-            set
-            {
-                DbConnection = value;
-            }
-        }
-
-        public override bool DesignTimeVisible
-        {
-            get
-            {
-                return _designTimeVisible;
-            }
-            set
-            {
-                _designTimeVisible = value;
-            }
-        }
-
         protected override DbParameterCollection DbParameterCollection
         {
             get
             {
                 return _parms;
-            }
-        }
-
-        public SAParameterCollection Parameters
-        {
-            get
-            {
-                return (SAParameterCollection)DbParameterCollection;
             }
         }
 
@@ -164,29 +130,9 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        public SATransaction Transaction
-        {
-            get
-            {
-                return (SATransaction)DbTransaction;
-            }
-            set
-            {
-                DbTransaction = value;
-            }
-        }
+        public override UpdateRowSource UpdatedRowSource { get; set; }
 
-        public override UpdateRowSource UpdatedRowSource
-        {
-            get
-            {
-                return _updatedRowSrc;
-            }
-            set
-            {
-                _updatedRowSrc = value;
-            }
-        }
+        public override bool DesignTimeVisible { get; set; }
 
         public SACommand()
         {
@@ -226,7 +172,7 @@ namespace iAnywhere.Data.SQLAnywhere
             _conn = other._conn;
             _asaTran = other._asaTran;
             _cmdType = other._cmdType;
-            _updatedRowSrc = other._updatedRowSrc;
+            UpdatedRowSource = other.UpdatedRowSource;
             _isExecuting = other._isExecuting;
             _idCmd = other._idCmd;
             _parms = new SAParameterCollection();
@@ -545,7 +491,7 @@ namespace iAnywhere.Data.SQLAnywhere
                     return null;
                 SADataReader saDataReader = new SADataReader(_conn, commandBehavior, idReader, _recordsAffected, this);
                 _wrReader = new WeakReference(saDataReader);
-                
+
                 return saDataReader;
             }
             catch (Exception ex)
@@ -754,7 +700,7 @@ namespace iAnywhere.Data.SQLAnywhere
                     if (_idCmd < 0)
                         return;
                     SAException.CheckException(PInvokeMethods.AsaCommand_Cancel(_idCmd));
-                }                
+                }
             }
             finally
             {
@@ -942,7 +888,7 @@ namespace iAnywhere.Data.SQLAnywhere
             _conn = null;
             _asaTran = null;
             _cmdType = CommandType.Text;
-            _updatedRowSrc = UpdateRowSource.OutputParameters;
+            UpdatedRowSource = UpdateRowSource.OutputParameters;
             _isExecuting = false;
             _idCmd = 0;
             _parms = null;

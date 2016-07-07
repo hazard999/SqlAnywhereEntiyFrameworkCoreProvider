@@ -8,12 +8,6 @@ namespace iAnywhere.Data.SQLAnywhere
         const string UnmanagedDll = "dbdata11.dll";
         const string c_kernelDll = "Kernel32.dll";
 
-        [DllImport("Kernel32.dll")]
-        public static extern IntPtr LocalAlloc(uint uFlags, UIntPtr uBytes);
-
-        [DllImport("Kernel32.dll")]
-        public static extern IntPtr LocalFree(IntPtr hMem);
-
         [DllImport("Kernel32.dll", CharSet = CharSet.Unicode)]
         public static extern IntPtr LoadLibrary(string fileName);
 

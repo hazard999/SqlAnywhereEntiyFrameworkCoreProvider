@@ -1,23 +1,7 @@
-﻿
-// Type: iAnywhere.Data.SQLAnywhere.SAConnectionStringBuilder
-// Assembly: iAnywhere.Data.SQLAnywhere.v4.0, Version=11.0.1.27424, Culture=neutral, PublicKeyToken=f222fc4333e0d400
-// MVID: CC4F9F8C-E618-49D1-9147-C06A9EF53D1F
-// Assembly location: C:\Program Files\SQL Anywhere 11\Assembly\V4\iAnywhere.Data.SQLAnywhere.v4.0.dll
-
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.Collections.Generic;
 
 namespace iAnywhere.Data.SQLAnywhere
 {
-    /// <summary>
-    ///     <para>Provides a simple way to create and manage the contents of connection strings used by the SAConnection class.</para>
-    /// </summary>
-    /// <remarks>
-    ///     <para>The SAConnectionStringBuilder class inherits SAConnectionStringBuilderBase, which inherits DbConnectionStringBuilder. </para>
-    ///     <para><b>Restrictions:</b> The SAConnectionStringBuilder class is not available in the .NET Compact Framework 2.0.</para>
-    ///     <para><b>Inherits:</b> <see cref="T:iAnywhere.Data.SQLAnywhere.SAConnectionStringBuilderBase" /></para>
-    ///     <para>For a list of connection parameters, see @olink targetdoc="dbadmin" targetptr="conmean"@Connection parameters@/olink@.</para>
-    /// </remarks>
     public sealed class SAConnectionStringBuilder : SAConnectionStringBuilderBase
     {
         private static Dictionary<string, ConnectionOptions> s_ConnOptions = new Dictionary<string, ConnectionOptions>();
@@ -114,7 +98,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["NewPassword"] = value;
             }
         }
-        
+
         public string DatabaseName
         {
             get
@@ -126,7 +110,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["DatabaseName"] = value;
             }
         }
-        
+
         public string DatabaseFile
         {
             get
@@ -150,7 +134,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["DatabaseSwitches"] = value;
             }
         }
-        
+
         public string ServerName
         {
             get
@@ -162,7 +146,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["ServerName"] = value;
             }
         }
-        
+
         public string Unconditional
         {
             get
@@ -174,7 +158,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["Unconditional"] = value;
             }
         }
-        
+
         public string StartLine
         {
             get
@@ -186,7 +170,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["StartLine"] = value;
             }
         }
-        
+
         public string ConnectionName
         {
             get
@@ -198,7 +182,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["ConnectionName"] = value;
             }
         }
-        
+
         public string AutoStop
         {
             get
@@ -210,7 +194,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["AutoStop"] = value;
             }
         }
-        
+
         public string DataSourceName
         {
             get
@@ -222,7 +206,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["DataSourceName"] = value;
             }
         }
-        
+
         public string Integrated
         {
             get
@@ -234,7 +218,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["Integrated"] = value;
             }
         }
-        
+
         public string FileDataSourceName
         {
             get
@@ -246,7 +230,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["FileDataSourceName"] = value;
             }
         }
-        
+
         public string EncryptedPassword
         {
             get
@@ -258,7 +242,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["EncryptedPassword"] = value;
             }
         }
-        
+
         public int CommBufferSize
         {
             get
@@ -270,7 +254,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["CommBufferSize"] = value;
             }
         }
-        
+
         public string Encryption
         {
             get
@@ -282,7 +266,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["Encryption"] = value;
             }
         }
-        
+
         public int LivenessTimeout
         {
             get
@@ -294,7 +278,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["LivenessTimeout"] = value;
             }
         }
-        
+
         public string LogFile
         {
             get
@@ -306,7 +290,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["LogFile"] = value;
             }
         }
-        
+
         public string DisableMultiRowFetch
         {
             get
@@ -318,7 +302,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["DisableMultiRowFetch"] = value;
             }
         }
-        
+
         public string AutoStart
         {
             get
@@ -330,7 +314,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["AutoStart"] = value;
             }
         }
-        
+
         public string Charset
         {
             get
@@ -342,7 +326,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["Charset"] = value;
             }
         }
-        
+
         public string ForceStart
         {
             get
@@ -354,7 +338,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["ForceStart"] = value;
             }
         }
-        
+
         public string AppInfo
         {
             get
@@ -378,7 +362,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["PrefetchRows"] = value;
             }
         }
-        
+
         public int PrefetchBuffer
         {
             get
@@ -414,7 +398,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["Compress"] = value;
             }
         }
-        
+
         public int CompressionThreshold
         {
             get
@@ -497,7 +481,7 @@ namespace iAnywhere.Data.SQLAnywhere
             {
                 this["Elevate"] = value;
             }
-        }        
+        }
 
         public int ConnectionTimeout
         {
@@ -510,7 +494,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["Connection Timeout"] = value;
             }
         }
-        
+
         public bool PersistSecurityInfo
         {
             get
@@ -522,7 +506,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["Persist Security Info"] = value;
             }
         }
-        
+
         public int ConnectionLifetime
         {
             get
@@ -534,7 +518,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["Connection Lifetime"] = value;
             }
         }
-        
+
         public bool ConnectionReset
         {
             get
@@ -546,7 +530,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["Connection Reset"] = value;
             }
         }
-        
+
         public bool Enlist
         {
             get
@@ -558,7 +542,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["Enlist"] = value;
             }
         }
-        
+
         public int MinPoolSize
         {
             get
@@ -570,7 +554,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["Min Pool Size"] = value;
             }
         }
-        
+
         public int MaxPoolSize
         {
             get
@@ -582,7 +566,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["Max Pool Size"] = value;
             }
         }
-        
+
         public bool Pooling
         {
             get
@@ -594,7 +578,7 @@ namespace iAnywhere.Data.SQLAnywhere
                 this["Pooling"] = value;
             }
         }
-        
+
         public string InitString
         {
             get
@@ -655,12 +639,12 @@ namespace iAnywhere.Data.SQLAnywhere
             SAConnectionStringBuilder.s_ConnOptions["Pooling"] = new ConnectionOptions("Pooling", "Pooling", null, ConnectionOptionType.Bool, true);
             SAConnectionStringBuilder.s_ConnOptions["InitString"] = new ConnectionOptions("InitString", "InitString", null, ConnectionOptionType.String, "");
         }
-        
+
         public SAConnectionStringBuilder()
           : this(null)
         {
         }
-        
+
         public SAConnectionStringBuilder(string connectionString)
         {
             SetConnectionOptions(SAConnectionStringBuilder.s_ConnOptions);
