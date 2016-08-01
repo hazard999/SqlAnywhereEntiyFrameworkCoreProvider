@@ -108,7 +108,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        public byte Precision
+        public override byte Precision
         {
             get
             {
@@ -120,7 +120,7 @@ namespace iAnywhere.Data.SQLAnywhere
             }
         }
 
-        public byte Scale
+        public override byte Scale
         {
             get
             {
@@ -390,16 +390,8 @@ namespace iAnywhere.Data.SQLAnywhere
 
         private void SetTypeFromValue()
         {
-            try
-            {
-                _asaDbType = SADataConvert.GetSADbTypeFromValue(_value);
-                _dbType = SADataConvert.GetDbTypeFromValue(_value);
-            }
-            catch (Exception ex)
-            {
-                Exception e = new ArgumentException(SARes.GetString(11007, _value.GetType().Name), "value");
-                throw e;
-            }
+            _asaDbType = SADataConvert.GetSADbTypeFromValue(_value);
+            _dbType = SADataConvert.GetDbTypeFromValue(_value);
         }
 
         public override string ToString()

@@ -5,12 +5,12 @@
   },
 
   "dependencies": {
-    "EFCoreTest": "1.0.0-*",
     "iAnywhere.Data.SQLAnywhere": "1.0.0-*",
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.0"
-    }
+    },
+    "SqlAnyhwere.EF.Core.Provider": "1.0.0-*"
   },
 
   "frameworks": {

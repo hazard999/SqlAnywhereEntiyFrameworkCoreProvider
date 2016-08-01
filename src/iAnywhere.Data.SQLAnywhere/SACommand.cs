@@ -16,7 +16,6 @@ namespace iAnywhere.Data.SQLAnywhere
         bool _getOutputParms = true;
         int _objectId = s_CurrentId++;
         int _timeout;
-        bool _designTimeVisible;
         string _cmdText;
         SAConnection _conn;
         SATransaction _asaTran;
@@ -24,7 +23,6 @@ namespace iAnywhere.Data.SQLAnywhere
         SAParameterCollection _parmsOld;
         bool _namedParms;
         CommandType _cmdType;
-        UpdateRowSource _updatedRowSrc;
         bool _isExecuting;
         bool _isPrepared;
         int _idCmd;
@@ -675,7 +673,6 @@ namespace iAnywhere.Data.SQLAnywhere
         void Fini()
         {
             _timeout = 30;
-            _designTimeVisible = true;
             _cmdText = "";
             _conn = null;
             _asaTran = null;

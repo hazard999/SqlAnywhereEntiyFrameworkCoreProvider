@@ -30,20 +30,6 @@ namespace iAnywhere.Data.SQLAnywhere
         }
 
         /// <summary>
-        ///     <para>The SAConnection object associated with the transaction, or a null reference (Nothing in Visual Basic) if the transaction is no longer valid.</para>
-        /// </summary>
-        /// <remarks>
-        ///     <para>A single application can have multiple database connections, each with zero or more transactions. This property enables you to determine the connection object associated with a particular transaction created by BeginTransaction.</para>
-        /// </remarks>
-        public SAConnection Connection
-        {
-            get
-            {
-                return _conn;
-            }
-        }
-
-        /// <summary>
         ///     <para>Specifies the isolation level for this transaction.</para>
         /// </summary>
         /// <value>The isolation level for this transaction. This can be one of:
